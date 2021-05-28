@@ -5,11 +5,28 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    storeSettingsConfig: {},
+    resultSettingConfig: {},
+    scene: '',
+    env: ''
   },
   mutations: {
+    setSettingsConfig(state, n) {
+      state.storeSettingsConfig = n;
+    },
+    setResultSettingConfig(state, n) {
+      state.resultSettingConfig = n;
+    },
+    updateScene(state, n) {
+      state.scene = n;
+    },
+    updateEnv(state, n) {
+      state.env = n;
+    }
   },
   actions: {
-  },
-  modules: {
+    // setDevicesInfo (context, n) {
+    // 	context.commit('setSettingsConfig', n);
+    // }
   }
 })

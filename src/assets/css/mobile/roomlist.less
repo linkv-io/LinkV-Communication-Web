@@ -1,0 +1,48 @@
+@media (max-width: 750px) {
+    .roomlist {
+        width: 6rem;
+        height: 90%;
+        border-radius: .12rem;
+        padding: .2rem;
+
+        .header {
+            // padding-bottom: .1rem;
+            .back {
+                width: .4rem;
+                height: .4rem;
+            }
+
+            .refresh-btn {
+                width: 1.56rem;
+                height: .56rem;
+                border-radius: .08rem;
+                font-size: .28rem;
+            }
+        }
+
+        .list {
+            height: calc(100% - .5rem);
+
+            .item {
+                height: 1.08rem;
+                font-size: .28rem;
+                margin-top: .28rem;
+
+                .roomid {
+                    max-width: 8rem;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .get-in {
+                    flex-shrink: 0;
+                    width: 1.56rem;
+                    height: .6rem;
+                    border-radius: .08rem;
+                    font-size: .28rem;
+                }
+            }
+        }
+    }
+}
