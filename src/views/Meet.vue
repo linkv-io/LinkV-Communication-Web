@@ -190,6 +190,7 @@ export default {
     getVideoStatus(status) {
       this.videoStatus = status;
     },
+    
     async pageInit() {
       const routerParams = this.$route.params;
       const crystalBallSource = this.getQueryString("source");

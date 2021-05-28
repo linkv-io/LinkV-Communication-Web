@@ -34,6 +34,7 @@ export default {
 				return this.stream;
 			},
 			set() {
+				// eslint-disable-next-line no-undef
 				this.$emit('update:stream', value)
 			}
 		}

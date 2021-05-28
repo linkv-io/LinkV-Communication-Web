@@ -1,12 +1,11 @@
 <template>
   <div class="login" id="login">
-    <div class="img"></div>
+    <el-button>selfUserId:{{ selfUserId }}</el-button>
     <el-button @click="handleCall">call</el-button>
     <el-button @click="handleCall">receive</el-button>
     <el-button @click="handleCall">Refuse</el-button>
     <el-input type="text" v-model="userId" placeholder="请输入呼叫的用户 id" />
     <!-- <img src="../assets/logo_ico@2x.png" alt="" /> -->
-    <el-button>selfUserId:{{ selfUserId }}</el-button>
   </div>
 </template>
 
@@ -43,9 +42,19 @@ export default {
         }
       );
       this.personalManager = window.im.personalManager;
+      this.onEvent();
     }
   },
   methods: {
+    onEvent() {
+      let { personalManager } = this;
+      if (personalManager) {
+        // eslint-disable-next-line no-unused-vars
+        personalManager.on("message", (value) => {
+          this.$message.success("接收私聊消息成功");
+        });
+      }
+    },
     handleCall() {
       const { personalManager, userId } = this;
       if (personalManager && userId) {
@@ -67,22 +76,6 @@ export default {
             this.$message.error("私信消息发送失败");
           }
         );
-
-        // personalManager.sendMessage(chatUserId, chatMessage).then(
-        //   (res) => {
-        //     console.log(res);
-        //     // this.$message.success("消息发送成功");
-        //     this.messageList.push({
-        //       content: this.chatMessage,
-        //       from: this.selfUserId,
-        //     });
-        //     this.chatMessage = "";
-        //   },
-        //   (err) => {
-        //     console.log("私信消息发送失败", err);
-        //     this.$message.error("私信消息发送失败");
-        //   }
-        // );
       } else {
         this.$message.error("请选择要发送的用户");
       }
@@ -92,9 +85,8 @@ export default {
 </script>
 
 <style lang="less">
-#login {
-  margin-top: 100px;
-  margin-left: 100px;
+.login {
+  margin-top: 200px;
   .el-button {
     font-size: 20px;
   }
