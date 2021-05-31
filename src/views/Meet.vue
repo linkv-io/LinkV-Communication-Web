@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 <template>
   <div class="meet">
     <Nav
@@ -104,7 +103,6 @@ import Nav from "@/components/navigate.vue";
 import Video from "@/components/video.vue";
 import Audio from "@/components/audio.vue";
 import Settings from "@/components/settings.vue";
-import utils from "@/utils";
 import * as bowser from "bowser";
 import config from "@/config/octopus.config.js";
 import { mapState } from "vuex";
@@ -119,7 +117,7 @@ export default {
   },
   data() {
     return {
-      userId: utils.uuid(),
+      userId: "",
       source: 0,
       roomId: "",
       streamList: [],
@@ -190,10 +188,12 @@ export default {
     getVideoStatus(status) {
       this.videoStatus = status;
     },
-    
+
     async pageInit() {
       const routerParams = this.$route.params;
-      const crystalBallSource = this.getQueryString("source");
+      const { roomId, userId } = routerParams;
+      this.roomId = String(roomId);
+      this.userId = String(userId);
       this.logLevel =
         this.getQueryString("logLevel") == void 0
           ? 0
@@ -202,96 +202,28 @@ export default {
         this.getQueryString("enableLogUpload") == void 0
           ? true
           : this.getQueryString("enableLogUpload");
-      let appId = "6977616048";
       let env = "prod";
-      if (crystalBallSource == void 0 && routerParams.source == void 0) {
-        // this.$router.push({ name: "Home" });
+      if (routerParams.source == void 0) {
+        this.$router.push({ name: "Home" });
         return;
       } else {
         let role = 1;
-        this.source = routerParams.source
-          ? routerParams.source
-          : crystalBallSource; // 1为推流 2为拉流 3为水晶球展示
+        this.source = routerParams.source; // 1为推流 2为拉流 3为水晶球展示
         if (this.source == 1 || this.source == 2) {
           this.currentConfig = {
             ...this.resultSettingConfig,
             ...config[env],
           };
-        } else {
-          appId = this.getQueryString("appId");
-          env = this.getQueryString("env");
         }
         switch (parseInt(this.source)) {
           case 1:
             this.direction = "push";
             role = 1;
-            await this.getLiveRoomId();
             console.log("publish::", this.roomId, this.userId);
             break;
           case 2:
             this.direction = "pull";
             role = 2;
-            this.roomId = routerParams.roomId;
-            break;
-          case 3:
-            appId = appId == void 0 ? "1069348354" : appId;
-            env = env == void 0 ? "prod" : env;
-            this.roomId = this.getQueryString("roomId");
-            this.direction = "pull";
-            if (this.roomId == void 0) {
-              this.$toast({ content: "roomId不能为空哟~" });
-            }
-
-            role = 2;
-            this.currentConfig = {
-              ...config[env],
-              appId,
-              env,
-            };
-            break;
-          case 4:
-            // eslint-disable-next-line no-case-declarations
-            const direction =
-              this.getQueryString("direction") == void 0
-                ? 1
-                : this.getQueryString("direction"); // 1: 推流 2: 拉流
-            this.roomId = this.getQueryString("roomId");
-            // eslint-disable-next-line no-case-declarations
-            const edgeUrl = this.getQueryString("edgeUrl");
-            appId = appId == void 0 ? "6977616048" : appId;
-            env = env == void 0 ? "prod" : env;
-            this.currentConfig = {
-              ...config[env],
-              edgeUrl,
-              appId,
-              env,
-            };
-
-            this.currentConfig.width = this.getQueryString("width");
-            this.currentConfig.height = this.getQueryString("height");
-            this.currentConfig.frameRate = this.getQueryString("frameRate");
-            this.currentConfig.bitRate = this.getQueryString("bitRate");
-            this.currentConfig.packageName = this.getQueryString("packageName");
-            this.currentConfig.sampleRate = this.getQueryString("sampleRate");
-            this.currentConfig.channelCount = this.getQueryString(
-              "channelCount"
-            );
-            this.currentConfig.audioBitrate = this.getQueryString(
-              "audioBitrate"
-            );
-
-            if (direction == 2 && this.roomId == void 0) {
-              this.$toast({ content: "roomId不能为空哟~" });
-            }
-
-            this.direction = direction == 1 ? "push" : "pull";
-            role = direction;
-
-            this.currentConfig.resolution = 1;
-            if (direction == 1) {
-              await this.getLiveRoomId();
-              console.log("publish::", this.roomId, this.userId);
-            }
             break;
         }
         this.initOctopus();
@@ -326,16 +258,16 @@ export default {
     },
     initOctopus() {
       const _config = {
-        appId: this.currentConfig.appId,
-        // logLevel: 1,
-        // remoteLogLevel: 1,
-        userId: this.userId,
+        appId: "2880636251",
+        userId: String(this.userId),
         userName: "u" + new Date().getTime(),
-        roomId: this.roomId,
-        env: this.currentConfig.env,
-        edgeUrl: this.currentConfig.edgeUrl,
-        appPackageName: this.currentConfig.packageName,
+        roomId: String(this.roomId),
+        env: "prod",
+        // appPackageName: "rtc",
+        type: "international",
       };
+
+      console.log(_config, "-----------_config");
       // eslint-disable-next-line no-undef
       this.octopusRTC = new OctopusRTC(_config);
       this.octopusRTC.setLogLevel(this.logLevel);

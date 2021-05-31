@@ -6,7 +6,7 @@ import 'element-ui/lib/theme-chalk/index.css';
 import store from './store'
 import Toast from "./components/toast/index";
 import getI18n from "./locales/index"
-import './util/setComponent';
+import './utils/setComponent';
 import './assets/common.css'
 Vue.config.productionTip = false
 Vue.prototype.$message = Message
