@@ -37,6 +37,7 @@ export default {
       userId: "",
       selfUserId: getSelfUserId(),
       personalManager: "",
+      liveroomManager: "",
       handleObj: {
         linkv_video_call: this.videoCallHandle,
         linkv_anwser_call: this.anwserCallHandle,
@@ -68,6 +69,7 @@ export default {
         this.$message.error("登录失败请重新登录");
       });
     this.personalManager = window.im.personalManager;
+    this.liveroomManager = window.im.liveroomManager;
     this.onEvent();
   },
   methods: {
@@ -152,7 +154,7 @@ export default {
       this.$message.success("接收到主动挂断的消息");
     },
     onEvent() {
-      let { personalManager } = this;
+      let { personalManager, liveroomManager } = this;
       let self = this;
       if (personalManager) {
         personalManager.on("message", (value) => {
@@ -167,10 +169,11 @@ export default {
           console.log(value);
         });
       }
-      const liveroomManager = window.im;
-      liveroomManager.on("message", (value) => {
-        console.log(value);
-      });
+      if (liveroomManager) {
+        liveroomManager.on("message", (value) => {
+          console.log(value);
+        });
+      }
     },
     // 函数
     call() {

@@ -65,7 +65,7 @@
         class="item share"
         :class="{ active: isActiveShare }"
         @click="display"
-        v-if="source == 1 && devidePlatform == 'desktop'"
+        v-if="false"
       ></li>
       <li
         class="item mute"
@@ -123,7 +123,6 @@ export default {
       streamList: [],
       currentConfig: {},
       videoMuted: false,
-      // isOnlyAudio: false,
       isShowRightList: true,
       isShowJoin: false,
       isShowSet: false,
@@ -135,7 +134,6 @@ export default {
         audioDevices: [],
         videoDevices: [],
       },
-      devidePlatform: "desktop",
       streamPause: false,
       videoStatus: true,
       direction: "push",
@@ -174,8 +172,6 @@ export default {
     },
   },
   async mounted() {
-    // 只有桌面端显示共享桌面按钮；
-    this.isShowDisplayBtn();
     console.log(
       "get init params:::",
       this.$route.params,
@@ -194,14 +190,6 @@ export default {
       const { roomId, userId } = routerParams;
       this.roomId = String(roomId);
       this.userId = String(userId);
-      this.logLevel =
-        this.getQueryString("logLevel") == void 0
-          ? 0
-          : this.getQueryString("logLevel");
-      this.enableLogUpload =
-        this.getQueryString("enableLogUpload") == void 0
-          ? true
-          : this.getQueryString("enableLogUpload");
       let env = "prod";
       if (routerParams.source == void 0) {
         this.$router.push({ name: "Home" });
@@ -232,7 +220,6 @@ export default {
           streamListTemp.forEach((value, key) => {
             if (value.userId.indexOf("H") != -1 && key != 0) {
               const temp = streamListTemp[0];
-              // streamListTemp[0] = value;
               this.$set(streamListTemp, 0, value);
               streamListTemp[key] = temp;
               streamListTemp["stream"] = null;
@@ -249,25 +236,15 @@ export default {
         n = window.location.search.substr(1).split("?")[0].match(t);
       return null != n ? decodeURIComponent(n[2]) : null;
     },
-    isShowDisplayBtn() {
-      // eslint-disable-next-line no-unused-vars
-      const { browser, engine, os, platform } = bowser.parse(
-        window.navigator.userAgent
-      );
-      this.devidePlatform = platform.type;
-    },
     initOctopus() {
       const _config = {
         appId: "2880636251",
-        userId: String(this.userId),
+        userId: this.userId,
         userName: "u" + new Date().getTime(),
-        roomId: String(this.roomId),
+        roomId: this.roomId,
         env: "prod",
-        // appPackageName: "rtc",
         type: "international",
       };
-
-      console.log(_config, "-----------_config");
       // eslint-disable-next-line no-undef
       this.octopusRTC = new OctopusRTC(_config);
       this.octopusRTC.setLogLevel(this.logLevel);
@@ -281,11 +258,6 @@ export default {
       this.handleCallbackFun();
     },
     async login(role) {
-      // const token = await this.getOctopusToken();
-      // const { auth, expire } = await this.getAuthExpire();
-      // console.log('getToken::', auth, expire);
-
-      // role 1 2
       const result = await this.octopusRTC.login(this.roomId, role, "", "");
       console.log("test login:::", result);
       return result;
@@ -411,16 +383,7 @@ export default {
         const type = code;
         this.streamList.forEach(async (value, key) => {
           if (value.streamId == streamId) {
-            // if (type == 11) {
-            // 	console.log('play state:::', type, this.videoStatus);
-            // 	if (!this.videoStatus) {
-            // 		document.getElementById(streamId).play();
-            // 		document.getElementById(streamId).pause();
-            // 	}
-            // } else
             if (type == 1 || type == 11) {
-              // this.streamPause = false;
-              // this.$set(value, 'stream', stream);
               this.$set(this.streamList, key, value);
             } else if (type == 0) {
               this.$toast({ content: `${streamId}拉流失败。` });

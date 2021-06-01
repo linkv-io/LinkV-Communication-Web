@@ -23,7 +23,7 @@
     <!-- 弹出框 接收-->
     <el-dialog
       :visible.sync="dialogVisible"
-      width="460px"
+      :width="isCall ? '440px' : '460px'"
       :modal="false"
       :show-close="false"
       :close-on-click-modal="false"
@@ -34,11 +34,20 @@
           <img src="../assets/touxiang.jpg" />
         </div>
         <div class="dialog-content-name">
-          <div class="dialog-content-name-title">小鱼儿</div>
-          <div class="dialog-content-name-content">申请和你视频通话</div>
+          <div class="dialog-content-name-title" v-show="isCall">花无缺</div>
+          <div class="dialog-content-name-content" v-show="isCall">
+            邀请小鱼儿视频通话
+          </div>
+          <div class="dialog-content-name-title" v-show="!isCall">小鱼儿</div>
+          <div class="dialog-content-name-content" v-show="!isCall">
+            申请和你视频通话
+          </div>
         </div>
         <div class="dialog-content-icon">
-          <div class="dialog-content-icon-receive">
+          <audio ref="audio" loop="loop">
+            <source src="../assets/voip_call.mp3" type="audio/mp3" />
+          </audio>
+          <div class="dialog-content-icon-receive" v-show="!isCall">
             <img src="../assets/anwser@3x.png" @click="receive" />
           </div>
           <div class="dialog-content-icon-refuse">
@@ -47,16 +56,6 @@
         </div>
       </div>
     </el-dialog>
-    <!-- 弹出框 发送包括挂断-->
-    <!-- <el-dialog
-      :visible.sync="dialogVisible"
-      width="460px"
-      :modal="false"
-      :show-close="false"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-    >
-    </el-dialog> -->
     <Settings
       v-bind:isShowSet.sync="isShowSet"
       v-on:get-settings="getSettings"
@@ -78,14 +77,17 @@ export default {
   name: "Home",
   data() {
     return {
+      im: null,
+      isCall: true,
       userId: "",
       dialogVisible: false,
-      selfUserId: getSelfUserId(),
+      selfUserId: String(getSelfUserId()),
       personalManager: "",
+      liveroomManager: "",
       handleObj: {
-        linkv_video_call: this.videoCallHandle,
-        linkv_anwser_call: this.anwserCallHandle,
-        linkv_hangup_call: this.hangupCallHandle,
+        linkv_video_call: this.videoHandle,
+        linkv_anwser_call: this.anwserHandle,
+        linkv_hangup_call: this.hangupHandle,
       },
       isAudio: null,
       accept: null,
@@ -97,47 +99,49 @@ export default {
     Settings,
   },
   mounted() {
-    let { WebIM } = window.webim;
-    window.im = new WebIM({
-      environment,
-      appId,
-      appKey,
-    });
-    window.im
-      .login(String(this.selfUserId), token)
-      .then((data) => {
-        console.log(data);
-        this.$message.success("登录成功");
-      })
-      .catch((err) => {
-        console.log(err, "err");
-        console.log(err.message);
-        this.$message.error("登录失败请重新登录");
-      });
-    this.personalManager = window.im.personalManager;
-    this.onEvent();
+    this.init();
   },
   methods: {
     getSettings(res) {
       this.$store.commit("updateEnv", res.env);
       this.$store.commit("setResultSettingConfig", res);
     },
+    init() {
+      let { WebIM } = window.webim;
+      window.im = new WebIM({
+        environment,
+        appId,
+        appKey,
+      });
+      window.im
+        .login(this.selfUserId, token)
+        .then((data) => {
+          console.log(data);
+          this.$message.success("登录成功");
+        })
+        .catch((err) => {
+          console.log(err, "err");
+          console.log(err.message);
+          this.$message.error("登录失败请重新登录");
+        });
+      this.personalManager = window.im.personalManager;
+      this.liveroomManager = window.im.liveroomManager;
+      this.onEvent();
+    },
+    // 发送直播间消息
     sendRoom() {
       this.message = "linkv_enable_mic";
-      window.im.liveroomManager
-        .sendMessage(String(this.selfUserId), this.message)
-        .then(
-          (data) => {
-            this.message = "";
-            // this.$message.success("消息发送成功");
-            console.log(data);
-          },
-          (err) => {
-            this.$message.success("消息发送失败");
-            console.log(err);
-          }
-        );
+      window.im.liveroomManager.sendMessage(this.selfUserId, this.message).then(
+        (data) => {
+          console.log(data);
+        },
+        (err) => {
+          this.$message.success("消息发送失败");
+          console.log(err);
+        }
+      );
     },
+    // 加入 im直播间
     joinIMRoom(value) {
       const { creatRoom } = value;
       const { im } = window;
@@ -145,22 +149,26 @@ export default {
       if (im && this.selfUserId && this.userId) {
         if (creatRoom) {
           im.liveroomManager
-            .create(String(this.selfUserId))
+            .create(this.selfUserId)
             .then(() => {
               this.$message.success("创建IM房间成功");
+              self.$refs.audio.pause();
               self.joinRtcRoom(true);
             })
             .catch((err) => {
+              self.$refs.audio.pause();
               console.log(err, "创建直播间失败");
               this.$message.error("创建直播间失败,请重新创建");
             });
         } else {
           im.liveroomManager
-            .join(String(this.userId))
+            .join(this.userId)
             .then(() => {
               setTimeout(() => {
                 self.joinRtcRoom(false);
-              }, 7000);
+                self.$refs.audio.pause();
+                self.dialogVisible = false;
+              }, 3000);
               this.$message.success("加入直播间成功");
             })
             .catch((err) => {
@@ -170,6 +178,7 @@ export default {
         }
       }
     },
+    // 加入 rtc房间
     joinRtcRoom(value) {
       this.$router.push({
         name: "Meet",
@@ -180,62 +189,22 @@ export default {
         },
       });
     },
-    videoCallHandle(content, from) {
-      const { isAudio } = content;
-      this.isAudio = isAudio;
-      this.dialogVisible = true;
-      this.userId = from;
-    },
-    anwserCallHandle(content) {
-      const { isAudio, accept } = content;
-      this.isAudio = isAudio;
-      this.accept = accept;
-      this.$message.success("接收到同意或拒绝呼叫");
-      // 如果是同意
-      if (accept) {
-        this.joinIMRoom({ createRoom: false });
-      } else {
-        this.$message({
-          type: "error",
-          message: "对方拒绝了您的视频",
-          showClose: true,
-          duration: 5000,
-          offset: 200,
-        });
-      }
-    },
-    hangupCallHandle() {
-      this.$message.success("接收到主动挂断的消息");
-    },
-    onEvent() {
-      let { personalManager } = this;
-      let self = this;
-      if (personalManager) {
-        personalManager.on("message", (value) => {
-          let {
-            $data: { content, extend1, from },
-          } = value;
-          content = JSON.parse(content);
-          self.handleObj[extend1](content, from);
-        });
-      }
-      const liveroomManager = window.im;
-      liveroomManager.on("message", (value) => {
-        console.log(value);
-      });
-    },
     // 函数
     call() {
       const { personalManager, userId } = this;
       if (personalManager && userId) {
+        this.isCall = true;
         let msg = { isAudio: false, extra: "" };
         let content = JSON.stringify(msg);
         let type = "linkv_video_call";
+        const self = this;
         personalManager
-          .sendEventMessage(String(userId), content, type)
-          .then((res) => {
-            console.log(res);
-            this.$message.success("发送呼叫消息成功");
+          .sendEventMessage(userId, content, type)
+          .then(() => {
+            this.dialogVisible = true;
+            setTimeout(() => {
+              self.$refs.audio.play();
+            });
           })
           .catch((err) => {
             console.log("发送呼叫消息失败", err);
@@ -245,6 +214,7 @@ export default {
         this.$message.error("请选择要发送的用户");
       }
     },
+    // 接收
     receive() {
       const { personalManager, userId } = this;
       if (personalManager && userId) {
@@ -252,9 +222,15 @@ export default {
         this.receiveAndRefuse(true);
       }
     },
+    // 拒绝
     refuse() {
+      this.$refs.audio.pause();
       this.dialogVisible = false;
-      this.receiveAndRefuse(false);
+      if (this.isCall) {
+        this.hangUp();
+      } else {
+        this.receiveAndRefuse(false);
+      }
     },
     //主动挂断
     hangUp() {
@@ -264,7 +240,7 @@ export default {
         let content = JSON.stringify(msg);
         let type = "linkv_hangup_call";
         personalManager
-          .sendEventMessage(String(userId), content, type)
+          .sendEventMessage(userId, content, type)
           .then((res) => {
             console.log(res);
             this.$message.success("发送主动挂断消息成功");
@@ -277,28 +253,102 @@ export default {
         this.$message.error("请选择要发送的用户");
       }
     },
-    // 同意或拒绝呼叫
-    receiveAndRefuse(accept) {
+    sendEventMessage(content, type) {
       const { personalManager, userId } = this;
       if (personalManager && userId) {
-        let msg = { isAudio: false, extra: "", accept };
-        let content = JSON.stringify(msg);
-        let type = "linkv_anwser_call";
         personalManager
-          .sendEventMessage(String(userId), content, type)
+          .sendEventMessage(userId, content, type)
           .then((res) => {
             console.log(res);
             console.log("发送同意或拒绝消息成功");
-            if (accept) {
-              this.joinIMRoom({ creatRoom: true });
-            }
           })
           .catch((err) => {
             console.log("发送同意或拒绝消息失败", err);
             this.$message.error("发送同意或拒绝消息失败");
           });
+      }
+    },
+
+    // 同意或拒绝呼叫
+    receiveAndRefuse(accept) {
+      const { personalManager, userId } = this;
+      if (personalManager && userId) {
+        // let msg = { isAudio: false, extra: "", accept };
+        // let content = JSON.stringify(msg);
+        // let type = "linkv_anwser_call";
+        if (accept) {
+          this.joinIMRoom({ creatRoom: true });
+        }
+        // personalManager
+        //   .sendEventMessage(userId, content, type)
+        //   .then((res) => {
+        //     console.log(res);
+        //     console.log("发送同意或拒绝消息成功");
+        //     if (accept) {
+        //       this.joinIMRoom({ creatRoom: true });
+        //     }
+        //   })
+        //   .catch((err) => {
+        //     console.log("发送同意或拒绝消息失败", err);
+        //     this.$message.error("发送同意或拒绝消息失败");
+        //   });
       } else {
         this.$message.error("请选择要发送的用户");
+      }
+    },
+    videoHandle(content, from) {
+      const { isAudio } = content;
+      this.isAudio = isAudio;
+      this.isCall = false;
+      this.dialogVisible = true;
+      const self = this;
+      setTimeout(() => {
+        self.$refs.audio.play();
+      }, 500);
+      this.userId = from;
+    },
+    anwserHandle(content) {
+      const { isAudio, accept } = content;
+      this.isAudio = isAudio;
+      this.accept = accept;
+      this.$message.success("接收到同意或拒绝呼叫");
+      // 如果是同意
+      if (accept) {
+        this.joinIMRoom({ createRoom: false });
+      } else {
+        this.$refs.audio.pause();
+        this.dialogVisible = false;
+        this.$message({
+          type: "error",
+          message: "对方拒绝了您的视频",
+          showClose: true,
+          duration: 5000,
+          offset: 200,
+        });
+      }
+    },
+    // 主动挂断
+    hangupHandle() {
+      this.$message.error("对端主动挂断了电话");
+      this.$refs.audio.pause();
+      this.dialogVisible = false;
+    },
+    onEvent() {
+      let { personalManager, liveroomManager } = this;
+      let self = this;
+      if (personalManager) {
+        personalManager.on("message", (value) => {
+          let {
+            $data: { content, extend1, from },
+          } = value;
+          content = JSON.parse(content);
+          self.handleObj[extend1](content, from);
+        });
+      }
+      if (liveroomManager) {
+        liveroomManager.on("message", (value) => {
+          console.log(value);
+        });
       }
     },
   },
@@ -422,6 +472,7 @@ export default {
   }
   .dialog-content {
     display: flex;
+    justify-content: space-between;
     .dialog-content-img {
       margin-right: 20px;
       width: 100px;
