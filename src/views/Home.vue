@@ -14,7 +14,10 @@
             :class="{ 'content-input': true }"
             v-model="userId"
           />
-          <button :class="{ btn: true, 'active-btn': userId }" @click="call">
+          <button
+            :class="{ btn: true, 'active-btn': userId && isLogin }"
+            @click="call"
+          >
             呼叫
           </button>
         </div>
@@ -71,12 +74,13 @@ import { getSelfUserId } from "../utils/util";
 import Settings from "@/components/settings.vue";
 import Nav from "@/components/navigate.vue";
 
-let { environment, appId, appKey, token } = config;
+let { environment, imAppId, rtcAppId, appKey, token } = config;
 
 export default {
   name: "Home",
   data() {
     return {
+      rim: null,
       im: null,
       isCall: true,
       userId: "",
@@ -92,6 +96,7 @@ export default {
       isAudio: null,
       accept: null,
       isShowSet: false,
+      isLogin: false,
     };
   },
   components: {
@@ -100,6 +105,7 @@ export default {
   },
   mounted() {
     this.init();
+    this.login();
   },
   methods: {
     getSettings(res) {
@@ -107,26 +113,31 @@ export default {
       this.$store.commit("setResultSettingConfig", res);
     },
     init() {
-      let { WebIM } = window.webim;
-      window.im = new WebIM({
-        environment,
-        appId,
+      this.rim = new window.RIM({
+        imAppId,
+        rtcAppId,
         appKey,
+        environment,
+        userId: this.selfUserId,
+        socketUrl: "wss://webimv2.fusionv.com/",
       });
-      window.im
+    },
+    login() {
+      const self = this;
+      this.rim
         .login(this.selfUserId, token)
-        .then((data) => {
-          console.log(data);
+        .then(() => {
           this.$message.success("登录成功");
+          this.isLogin = true;
+          const { _personalManager, _liveroomManager } = self.rim;
+          self.personalManager = _personalManager;
+          self.liveroomManager = _liveroomManager;
+          self.onEvent();
         })
         .catch((err) => {
-          console.log(err, "err");
-          console.log(err.message);
           this.$message.error("登录失败请重新登录");
+          console.log("登录失败", err);
         });
-      this.personalManager = window.im.personalManager;
-      this.liveroomManager = window.im.liveroomManager;
-      this.onEvent();
     },
     // 发送直播间消息
     sendRoom() {
@@ -142,50 +153,52 @@ export default {
       );
     },
     // 加入 im直播间
-    joinIMRoom(value) {
+    joinRoom(value) {
       const { creatRoom } = value;
-      const { im } = window;
       const self = this;
-      if (im && this.selfUserId && this.userId) {
-        if (creatRoom) {
-          im.liveroomManager
-            .create(this.selfUserId)
-            .then(() => {
-              this.$message.success("创建IM房间成功");
-              self.$refs.audio.pause();
-              self.joinRtcRoom(true);
-            })
-            .catch((err) => {
-              self.$refs.audio.pause();
-              console.log(err, "创建直播间失败");
-              this.$message.error("创建直播间失败,请重新创建");
-            });
-        } else {
-          im.liveroomManager
-            .join(this.userId)
-            .then(() => {
-              setTimeout(() => {
-                self.joinRtcRoom(false);
-                self.$refs.audio.pause();
-                self.dialogVisible = false;
-              }, 3000);
-              this.$message.success("加入直播间成功");
-            })
-            .catch((err) => {
-              console.log(err, "加入直播间失败");
-              this.$message.error("加入直播间失败,请重新加入");
-            });
-        }
-      }
+      let roomId = creatRoom ? this.selfUserId : this.userId;
+      self.rim
+        .joinRoom(this.selfUserId, roomId, creatRoom ? 1 : 2, token, "", "")
+        .then((data) => {
+          if (creatRoom) {
+            const { personalManager, userId } = this;
+            if (personalManager && userId) {
+              let msg = { isAudio: false, extra: "", accept: true };
+              let content = JSON.stringify(msg);
+              let type = "linkv_anwser_call";
+              personalManager
+                .sendEventMessage(userId, content, type)
+                .then((res) => {
+                  console.log(res);
+                  console.log("发送同意或拒绝消息成功");
+                })
+                .catch((err) => {
+                  console.log("发送同意或拒绝消息失败", err);
+                  this.$message.error("发送同意或拒绝消息失败");
+                });
+            } else {
+              this.$message.error("请选择要发送的用户");
+            }
+          }
+          self.$refs.audio.pause();
+          self.goMeet(creatRoom, data, self.rim);
+        })
+        .catch((err) => {
+          self.$refs.audio.pause();
+          console.log(err, "创建直播间失败");
+          this.$message.error("创建直播间失败,请重新创建");
+        });
     },
-    // 加入 rtc房间
-    joinRtcRoom(value) {
+    goMeet(value, streamListTemp, rim) {
+      console.log(streamListTemp, "streamListTemp");
       this.$router.push({
         name: "Meet",
         params: {
           source: value ? 1 : 2,
           roomId: value ? this.selfUserId : this.userId,
           userId: this.selfUserId,
+          streamListTemp,
+          rim,
         },
       });
     },
@@ -271,29 +284,8 @@ export default {
 
     // 同意或拒绝呼叫
     receiveAndRefuse(accept) {
-      const { personalManager, userId } = this;
-      if (personalManager && userId) {
-        // let msg = { isAudio: false, extra: "", accept };
-        // let content = JSON.stringify(msg);
-        // let type = "linkv_anwser_call";
-        if (accept) {
-          this.joinIMRoom({ creatRoom: true });
-        }
-        // personalManager
-        //   .sendEventMessage(userId, content, type)
-        //   .then((res) => {
-        //     console.log(res);
-        //     console.log("发送同意或拒绝消息成功");
-        //     if (accept) {
-        //       this.joinIMRoom({ creatRoom: true });
-        //     }
-        //   })
-        //   .catch((err) => {
-        //     console.log("发送同意或拒绝消息失败", err);
-        //     this.$message.error("发送同意或拒绝消息失败");
-        //   });
-      } else {
-        this.$message.error("请选择要发送的用户");
+      if (accept) {
+        this.joinRoom({ creatRoom: true });
       }
     },
     videoHandle(content, from) {
@@ -313,8 +305,11 @@ export default {
       this.accept = accept;
       this.$message.success("接收到同意或拒绝呼叫");
       // 如果是同意
+      const self = this;
       if (accept) {
-        this.joinIMRoom({ createRoom: false });
+        setTimeout(() => {
+          self.joinRoom({ createRoom: false });
+        }, 3000);
       } else {
         this.$refs.audio.pause();
         this.dialogVisible = false;

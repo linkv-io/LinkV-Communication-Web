@@ -7,7 +7,8 @@
 let config = {
     token: 'hami69b4f5d9e5bbd0d547b436d41817',
     environment: "development",
-    appId: 'linkvim',
+    imAppId: 'linkvim',
+    rtcAppId: '2880636251',
     appKey: "4fb21e3d",
 }
 

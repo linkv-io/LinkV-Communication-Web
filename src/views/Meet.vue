@@ -187,15 +187,18 @@ export default {
 
     async pageInit() {
       const routerParams = this.$route.params;
-      const { roomId, userId } = routerParams;
-      this.roomId = String(roomId);
-      this.userId = String(userId);
+      // eslint-disable-next-line no-unused-vars
+      const { roomId, userId, streamListTemp, rim } = routerParams;
+      this.rim = rim;
+      this.octopusRTC = this.rim._octopusRTC;
+      this.roomId = roomId;
+      this.userId = userId;
       let env = "prod";
+      this.handleCallbackFun();
       if (routerParams.source == void 0) {
         this.$router.push({ name: "Home" });
         return;
       } else {
-        let role = 1;
         this.source = routerParams.source; // 1为推流 2为拉流 3为水晶球展示
         if (this.source == 1 || this.source == 2) {
           this.currentConfig = {
@@ -206,16 +209,12 @@ export default {
         switch (parseInt(this.source)) {
           case 1:
             this.direction = "push";
-            role = 1;
             console.log("publish::", this.roomId, this.userId);
             break;
           case 2:
             this.direction = "pull";
-            role = 2;
             break;
         }
-        this.initOctopus();
-        const streamListTemp = await this.login(role);
         if (streamListTemp.length != 0) {
           streamListTemp.forEach((value, key) => {
             if (value.userId.indexOf("H") != -1 && key != 0) {
@@ -235,32 +234,6 @@ export default {
       var t = new RegExp("(^|&)" + key + "=([^&]*)(&|$)", "i"),
         n = window.location.search.substr(1).split("?")[0].match(t);
       return null != n ? decodeURIComponent(n[2]) : null;
-    },
-    initOctopus() {
-      const _config = {
-        appId: "2880636251",
-        userId: this.userId,
-        userName: "u" + new Date().getTime(),
-        roomId: this.roomId,
-        env: "prod",
-        type: "international",
-      };
-      // eslint-disable-next-line no-undef
-      this.octopusRTC = new OctopusRTC(_config);
-      this.octopusRTC.setLogLevel(this.logLevel);
-      if (this.enableLogUpload) {
-        this.octopusRTC.enableLogUpload();
-      } else {
-        this.octopusRTC.disableLogUpload();
-      }
-
-      this.octopusRTC.init();
-      this.handleCallbackFun();
-    },
-    async login(role) {
-      const result = await this.octopusRTC.login(this.roomId, role, "", "");
-      console.log("test login:::", result);
-      return result;
     },
     createVideoElement() {
       if (this.direction == "push" || this.isShowJoin) {
@@ -345,22 +318,23 @@ export default {
       this.publishStream(this.previewResult);
     },
     palyStream(userId) {
-      return this.octopusRTC.startPlayingStream(userId);
+      console.log(userId);
+      return this.rim.startPlayingStream(userId);
     },
     publishStream(stream) {
-      this.octopusRTC.startPublishingStream(this.userId, stream);
+      this.rim.startPublishingStream(this.userId, stream);
     },
     stopPublishStream() {
       for (let item of this.streamList) {
         if (item.userId == this.userId) {
-          this.octopusRTC.destroyStream(item.stream);
+          this.rim.destroyStream(item.stream);
         }
       }
-      this.octopusRTC.stopPublishingStream(this.userId);
+      this.rim.stopPublishingStream(this.userId);
       clearInterval(this.publishStatsTimer[this.userId]);
     },
     async startPreview(params) {
-      return await this.octopusRTC.createStream(params);
+      return await this.rim.createStream(params);
     },
     handleCallbackFun() {
       this.octopusRTC.on("disconnect", async (err) => {
@@ -752,19 +726,16 @@ export default {
         this.updateRoom("3");
       }
       this.isClosed = true;
-      // if (this.isShowJoin) {
-      // 	this.stopPublishStream();
-      // }
       // eslint-disable-next-line no-unused-vars
       this.streamList.forEach((value, key, arr) => {
         if (value.userId == this.userId) {
           this.stopPublishStream();
         } else {
-          this.octopusRTC.stopPlayingStream(value.streamId);
+          this.rim.stopPlayingStream(value.streamId);
           clearInterval(this.playStatsTimer[value.streamId]);
         }
       });
-      this.octopusRTC.logout();
+      this.rim.logout();
       this.$router.push({ name: "Home" });
     },
   },
