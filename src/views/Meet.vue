@@ -65,6 +65,7 @@
         class="item share"
         :class="{ active: isActiveShare }"
         @click="display"
+        ref="display"
         v-if="false"
       ></li>
       <li
@@ -277,6 +278,7 @@ export default {
         this.$set(item, "stream", stream);
         this.$set(this.streamList, index, item);
       }
+      this.join();
     },
     async creatPublishStream() {
       this.previewResult = await this.startPreview({
@@ -337,7 +339,7 @@ export default {
       return await this.rim.createStream(params);
     },
     handleCallbackFun() {
-      this.octopusRTC.on("disconnect", async (err) => {
+      this.rim.on("disconnect", async (err) => {
         console.log("handleDisconnect:::", err);
         this.$toast({ content: this.$t("m.connectionError") });
         this.close();
@@ -376,41 +378,42 @@ export default {
           console.log("play stats result:::", audioResult, videoResult);
         }, 2000);
       };
-      this.octopusRTC.on("play-state-update", playCallback);
+      this.rim.on("play-state-update", playCallback);
 
       // add by version2.0.0
-      this.octopusRTC.on(
-        "publish-state-update",
-        ({ code, streamId, state }) => {
-          console.log("event emit publisherStateUpdate", code, state);
-          if (this.publishStatsTimer[streamId]) {
-            clearInterval(this.publishStatsTimer[streamId]);
-          }
-          const type = code;
-          if (type == 1) {
-            if (this.source == 1) {
-              this.updateRoom("1");
-              setTimeout(() => {
-                this.intervalUpdateRoom();
-              }, 500);
-            }
-          } else if (type == 2) {
-            // this.publishStream();
-          } else if (type == 0) {
-            this.$toast({ content: `${streamId}推流失败。` });
-          }
-          this.publishStatsTimer[streamId] = setInterval(async () => {
-            const audioResult = await this.octopusRTC.getLocalAudioStats(
-              streamId
-            );
-            const videoResult = await this.octopusRTC.getLocalVideoStats(
-              streamId
-            );
-            console.log("publish stats result:::", audioResult, videoResult);
-          }, 2000);
+      this.rim.on("publish-state-update", ({ code, streamId, state }) => {
+        console.log("event emit publisherStateUpdate", code, state);
+        if (this.publishStatsTimer[streamId]) {
+          clearInterval(this.publishStatsTimer[streamId]);
         }
-      );
-      this.octopusRTC.on("stream-update", ({ code, streamList }) => {
+        const type = code;
+        if (type == 1) {
+          if (this.source == 1) {
+            this.updateRoom("1");
+            setTimeout(() => {
+              this.intervalUpdateRoom();
+            }, 500);
+          }
+        } else if (type == 2) {
+          // this.publishStream();
+        } else if (type == 0) {
+          this.$toast({ content: `${streamId}推流失败。` });
+        }
+        this.publishStatsTimer[streamId] = setInterval(async () => {
+          const audioResult = await this.octopusRTC.getLocalAudioStats(
+            streamId
+          );
+          const videoResult = await this.octopusRTC.getLocalVideoStats(
+            streamId
+          );
+          console.log("publish stats result:::", audioResult, videoResult);
+        }, 2000);
+      });
+      this.rim.on("stream-update", ({ code, streamList }) => {
+        console.log("----stream-update-----");
+        console.log(code, "-----code------");
+        console.log(streamList, "----streamList---");
+
         console.log("onStreamUpdated:::", code, streamList);
         const type = code;
         if (type == 1) {
@@ -441,7 +444,7 @@ export default {
                 }, 2000);
               } else {
                 this.streamList.splice(key, 1);
-                this.octopusRTC.stopPlayingStream(value.userId);
+                this.rim.stopPlayingStream(value.userId);
                 this.$toast({
                   content: `${streamList[0].userId}${this.$t("m.leaveRoom")}`,
                 });
@@ -595,7 +598,7 @@ export default {
       console.log("click mute:::");
       if (this.isActiveMute) {
         this.isActiveMute = false;
-        this.octopusRTC.muteSwitch(this.userId, false);
+        this.rim.muteSwitch(this.userId, false);
         this.$toast({ content: "已取消静音" });
       } else {
         this.isActiveMute = true;
@@ -623,10 +626,10 @@ export default {
       console.log("click record:::");
       if (this.isActiveCamera) {
         this.isActiveCamera = false;
-        this.octopusRTC.cameraSwitch(this.userId, "open");
+        this.rim.cameraSwitch(this.userId, "open");
       } else {
         this.isActiveCamera = true;
-        this.octopusRTC.cameraSwitch(this.userId, "close");
+        this.rim.cameraSwitch(this.userId, "close");
       }
     },
     set() {

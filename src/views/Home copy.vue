@@ -86,8 +86,6 @@ export default {
       userId: "",
       dialogVisible: false,
       selfUserId: String(getSelfUserId()),
-      personalManager: "",
-      liveroomManager: "",
       handleObj: {
         linkv_video_call: this.videoHandle,
         linkv_anwser_call: this.anwserHandle,
@@ -122,22 +120,20 @@ export default {
         socketUrl: "wss://webimv2.fusionv.com/",
       });
     },
-    login() {
+    async login() {
       const self = this;
-      this.rim
-        .login(this.selfUserId, token)
-        .then(() => {
-          this.$message.success("登录成功");
-          this.isLogin = true;
-          const { _personalManager, _liveroomManager } = self.rim;
-          self.personalManager = _personalManager;
-          self.liveroomManager = _liveroomManager;
-          self.onEvent();
-        })
-        .catch((err) => {
-          this.$message.error("登录失败请重新登录");
-          console.log("登录失败", err);
-        });
+      try {
+        await this.rim.login();
+        this.$message.success("登录成功");
+        this.isLogin = true;
+        const { _personalManager, _liveroomManager } = this.rim;
+        this.personalManager = _personalManager;
+        this.liveroomManager = _liveroomManager;
+        self.onEvent();
+      } catch (error) {
+        this.$message.error("登录失败请重新登录");
+        console.log("登录失败", error);
+      }
     },
     // 发送直播间消息
     sendRoom() {
@@ -158,7 +154,7 @@ export default {
       const self = this;
       let roomId = creatRoom ? this.selfUserId : this.userId;
       self.rim
-        .joinRoom(roomId, creatRoom ? 1 : 2, token, "", "")
+        .joinRoom(this.selfUserId, roomId, creatRoom ? 1 : 2, token, "", "")
         .then((data) => {
           if (creatRoom) {
             const { personalManager, userId } = this;
