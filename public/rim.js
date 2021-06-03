@@ -34,15 +34,7 @@ function RIM(options) {
         socketUrl: this._socketUrl
     });
 
-    this._octopusRTC = new OctopusRTC({
-        appId: this._rtcAppId,
-        userId: this._userId,
-        env: this._env,
-        edgeUrl: this._edgeUrl,
-        appPackageName: this._appPackageName,
-        type: 'international'
-    });
-    this._octopusRTC.init();
+
 
     this._personalManager = this._webIM.personalManager;
     this._liveroomManager = this._webIM.liveroomManager;
@@ -55,6 +47,16 @@ RIM.prototype.login = function (userId, token) {
 };
 
 RIM.prototype.joinRoom = async function (userId, roomId, role, token, auth, expire) {
+    this._userId = userId;
+    this._octopusRTC = new OctopusRTC({
+        appId: this._rtcAppId,
+        userId,
+        env: this._env,
+        edgeUrl: this._edgeUrl,
+        appPackageName: this._appPackageName,
+        type: 'international'
+    });
+    this._octopusRTC.init();
     const imLogin = await this._liveroomManager.join(roomId);
     const rtcLogin = await this._octopusRTC?.login(roomId, role, auth, expire);
     try {

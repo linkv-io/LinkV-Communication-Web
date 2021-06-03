@@ -23,12 +23,10 @@
 export default {
   data() {
     return {
-      list: [],
       message: "",
-      id: "",
     };
   },
-  props: {},
+  props: ["rim", "roomId", "userId", "list"],
   mounted() {
     this.onEvent(this.rim);
   },
@@ -36,39 +34,19 @@ export default {
     onEnterSendMessage() {
       this.onSend();
     },
-    onEvent(im) {
-      const { liveroomManager } = im;
-      const list = this.list;
-      // 直播间消息
-      liveroomManager.on("message", (value) => {
-        console.log(value);
-        if (list.length > 10) {
-          list.pop();
-          list.push(value);
-        } else {
-          list.push(value);
-        }
-      });
-      // 用户加入
-      liveroomManager.on("join", (value) => {
-        this.$message.success(`用户${value.userId}加入直播间`);
-      });
-      // 用户离开
-      liveroomManager.on("leave", (value) => {
-        this.$message.warning(`用户${value.userId}离开直播间`);
-      });
-      // 创建
-      liveroomManager.on("create", (value) => {
-        this.$message.warning(`用户${value.userId}创建的直播间`);
-      });
-    },
+
     onSend() {
+      let self = this;
       if (this.rim && this.message) {
         this.rim.liveroomManager.sendMessage(this.roomId, this.message).then(
-          (data) => {
+          () => {
+            const list = this.list;
+            if (list.length > 10) {
+              list.pop();
+            }
+            list.push({ from: self.userId, content: this.message });
             this.message = "";
             this.$message.success("消息发送成功");
-            console.log(data);
           },
           (err) => {
             this.$message.success("消息发送失败");
@@ -91,6 +69,7 @@ export default {
   .right {
     width: 446px;
     .content {
+      padding: 0px;
       background: rgba(0, 0, 0, 0.4);
       width: 100%;
       box-sizing: border-box;
@@ -110,7 +89,7 @@ export default {
           color: #3674ff;
         }
         .content-item-content {
-          color: #666666;
+          color: #ddd;
           margin-left: 4px;
         }
       }

@@ -66,7 +66,6 @@
     />
   </div>
 </template>
-
 <script>
 // @ is an alias to /src
 import config from "../config";
@@ -84,6 +83,7 @@ export default {
       im: null,
       isCall: true,
       userId: "",
+      rtcUserId: "",
       dialogVisible: false,
       selfUserId: String(getSelfUserId()),
       personalManager: "",
@@ -140,32 +140,26 @@ export default {
         });
     },
     // 发送直播间消息
-    sendRoom() {
-      this.message = "linkv_enable_mic";
-      window.im.liveroomManager.sendMessage(this.selfUserId, this.message).then(
-        (data) => {
-          console.log(data);
-        },
-        (err) => {
-          this.$message.success("消息发送失败");
-          console.log(err);
-        }
-      );
-    },
+    // sendRoom() {
+    //   this.message = "linkv_enable_mic";
+    //   window.im.liveroomManager.sendMessage(this.selfUserId, this.message).then(
+    //     (data) => {
+    //       console.log(data);
+    //     },
+    //     (err) => {
+    //       this.$message.success("消息发送失败");
+    //       console.log(err);
+    //     }
+    //   );
+    // },
     // 加入 im直播间
     joinRoom(value) {
       const { creatRoom } = value;
       const self = this;
       let roomId = creatRoom ? this.selfUserId : this.userId;
+      this.rtcUserId = creatRoom ? "H" + this.selfUserId : this.selfUserId;
       self.rim
-        .joinRoom(
-          creatRoom ? "H" + this.selfUserId : this.selfUserId,
-          roomId,
-          creatRoom ? 1 : 2,
-          token,
-          "",
-          ""
-        )
+        .joinRoom(this.rtcUserId, roomId, creatRoom ? 1 : 2, token, "", "")
         .then((data) => {
           if (creatRoom) {
             const { personalManager, userId } = this;
@@ -203,7 +197,7 @@ export default {
         params: {
           source: value ? 1 : 2,
           roomId: value ? this.selfUserId : this.userId,
-          userId: value ? "H" + this.selfUserId : this.selfUserId,
+          userId: this.rtcUserId,
           streamListTemp,
           rim,
         },

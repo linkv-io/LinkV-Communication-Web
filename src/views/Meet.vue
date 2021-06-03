@@ -65,8 +65,12 @@
         class="item share"
         :class="{ active: isActiveShare }"
         @click="display"
-        ref="display"
         v-if="false"
+      ></li>
+      <li
+        class="item share"
+        :class="{ active: isActiveShare }"
+        @click="live"
       ></li>
       <li
         class="item mute"
@@ -86,7 +90,7 @@
         @click="record"
         v-if="isShowRecord"
       ></li>
-      <li class="item set" @click="set" v-if="source != 3"></li>
+      <!-- <li class="item set" @click="set" v-if="source != 3"></li> -->
       <li class="item close" @click="close"></li>
     </ul>
     <Settings
@@ -96,7 +100,13 @@
       v-bind:source="'meet'"
       v-on:get-settings="getSettings"
     />
-    <Live v-show="isShowLive" />
+    <Live
+      v-if="isShowLive"
+      :rim="rim"
+      :roomId="roomId"
+      :userId="userId"
+      :list="list"
+    />
   </div>
 </template>
 
@@ -121,7 +131,9 @@ export default {
   },
   data() {
     return {
-      isShowLive: true,
+      list: [],
+      rim: null,
+      isShowLive: false,
       userId: "",
       source: 0,
       roomId: "",
@@ -200,6 +212,7 @@ export default {
       this.userId = userId;
       let env = "prod";
       this.handleCallbackFun();
+      this.onEvent();
       if (routerParams.source == void 0) {
         this.$router.push({ name: "Home" });
         return;
@@ -345,8 +358,34 @@ export default {
     async startPreview(params) {
       return await this.rim.createStream(params);
     },
+    onEvent() {
+      const { liveroomManager } = this.rim;
+      const list = this.list;
+      // 直播间消息
+      liveroomManager.on("message", (value) => {
+        this.isShowLive = true;
+        if (list.length > 10) {
+          list.pop();
+          list.push(value);
+        } else {
+          list.push(value);
+        }
+      });
+      // 用户加入
+      liveroomManager.on("join", (value) => {
+        this.$message.success(`用户${value.userId}加入直播间`);
+      });
+      // 用户离开
+      liveroomManager.on("leave", (value) => {
+        this.$message.warning(`用户${value.userId}离开直播间`);
+      });
+      // 创建
+      liveroomManager.on("create", (value) => {
+        this.$message.warning(`用户${value.userId}创建的直播间`);
+      });
+    },
     handleCallbackFun() {
-      this.rim.on("disconnect", async (err) => {
+      this.octopusRTC.on("disconnect", async (err) => {
         console.log("handleDisconnect:::", err);
         this.$toast({ content: this.$t("m.connectionError") });
         this.close();
@@ -385,38 +424,41 @@ export default {
           console.log("play stats result:::", audioResult, videoResult);
         }, 2000);
       };
-      this.rim.on("play-state-update", playCallback);
+      this.octopusRTC.on("play-state-update", playCallback);
 
       // add by version2.0.0
-      this.rim.on("publish-state-update", ({ code, streamId, state }) => {
-        console.log("event emit publisherStateUpdate", code, state);
-        if (this.publishStatsTimer[streamId]) {
-          clearInterval(this.publishStatsTimer[streamId]);
-        }
-        const type = code;
-        if (type == 1) {
-          if (this.source == 1) {
-            this.updateRoom("1");
-            setTimeout(() => {
-              this.intervalUpdateRoom();
-            }, 500);
+      this.octopusRTC.on(
+        "publish-state-update",
+        ({ code, streamId, state }) => {
+          console.log("event emit publisherStateUpdate", code, state);
+          if (this.publishStatsTimer[streamId]) {
+            clearInterval(this.publishStatsTimer[streamId]);
           }
-        } else if (type == 2) {
-          // this.publishStream();
-        } else if (type == 0) {
-          this.$toast({ content: `${streamId}推流失败。` });
+          const type = code;
+          if (type == 1) {
+            if (this.source == 1) {
+              this.updateRoom("1");
+              setTimeout(() => {
+                this.intervalUpdateRoom();
+              }, 500);
+            }
+          } else if (type == 2) {
+            // this.publishStream();
+          } else if (type == 0) {
+            this.$toast({ content: `${streamId}推流失败。` });
+          }
+          this.publishStatsTimer[streamId] = setInterval(async () => {
+            const audioResult = await this.octopusRTC.getLocalAudioStats(
+              streamId
+            );
+            const videoResult = await this.octopusRTC.getLocalVideoStats(
+              streamId
+            );
+            console.log("publish stats result:::", audioResult, videoResult);
+          }, 2000);
         }
-        this.publishStatsTimer[streamId] = setInterval(async () => {
-          const audioResult = await this.octopusRTC.getLocalAudioStats(
-            streamId
-          );
-          const videoResult = await this.octopusRTC.getLocalVideoStats(
-            streamId
-          );
-          console.log("publish stats result:::", audioResult, videoResult);
-        }, 2000);
-      });
-      this.rim.on("stream-update", ({ code, streamList }) => {
+      );
+      this.octopusRTC.on("stream-update", ({ code, streamList }) => {
         console.log("onStreamUpdated:::", code, streamList);
         const type = code;
         if (type == 1) {
@@ -543,6 +585,10 @@ export default {
       } else {
         this.isShowRightList = true;
       }
+    },
+    live() {
+      this.isActiveShare = !this.isActiveShare;
+      this.isShowLive = !this.isShowLive;
     },
     async display() {
       if (this.isActiveShare) {
@@ -703,14 +749,6 @@ export default {
           );
 
           if (constrains.video.videoDevices) {
-            // this.streamList.forEach((value, key) => {
-            // 	if (value.userId == this.userId) {
-            // 		this.$set(this.streamList, key, {
-            // 			...value,
-            // 			stream: result.stream
-            // 		});
-            // 	}
-            // })
             if (this.isActiveCamera) {
               this.isActiveCamera = false;
             }

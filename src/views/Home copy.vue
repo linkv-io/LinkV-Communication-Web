@@ -84,8 +84,11 @@ export default {
       im: null,
       isCall: true,
       userId: "",
+      rtcUserId: "",
       dialogVisible: false,
       selfUserId: String(getSelfUserId()),
+      personalManager: "",
+      liveroomManager: "",
       handleObj: {
         linkv_video_call: this.videoHandle,
         linkv_anwser_call: this.anwserHandle,
@@ -120,41 +123,44 @@ export default {
         socketUrl: "wss://webimv2.fusionv.com/",
       });
     },
-    async login() {
+    login() {
       const self = this;
-      try {
-        await this.rim.login();
-        this.$message.success("登录成功");
-        this.isLogin = true;
-        const { _personalManager, _liveroomManager } = this.rim;
-        this.personalManager = _personalManager;
-        this.liveroomManager = _liveroomManager;
-        self.onEvent();
-      } catch (error) {
-        this.$message.error("登录失败请重新登录");
-        console.log("登录失败", error);
-      }
+      this.rim
+        .login(this.selfUserId, token)
+        .then(() => {
+          this.$message.success("登录成功");
+          this.isLogin = true;
+          const { _personalManager, _liveroomManager } = self.rim;
+          self.personalManager = _personalManager;
+          self.liveroomManager = _liveroomManager;
+          self.onEvent();
+        })
+        .catch((err) => {
+          this.$message.error("登录失败请重新登录");
+          console.log("登录失败", err);
+        });
     },
     // 发送直播间消息
-    sendRoom() {
-      this.message = "linkv_enable_mic";
-      window.im.liveroomManager.sendMessage(this.selfUserId, this.message).then(
-        (data) => {
-          console.log(data);
-        },
-        (err) => {
-          this.$message.success("消息发送失败");
-          console.log(err);
-        }
-      );
-    },
+    // sendRoom() {
+    //   this.message = "linkv_enable_mic";
+    //   window.im.liveroomManager.sendMessage(this.selfUserId, this.message).then(
+    //     (data) => {
+    //       console.log(data);
+    //     },
+    //     (err) => {
+    //       this.$message.success("消息发送失败");
+    //       console.log(err);
+    //     }
+    //   );
+    // },
     // 加入 im直播间
     joinRoom(value) {
       const { creatRoom } = value;
       const self = this;
       let roomId = creatRoom ? this.selfUserId : this.userId;
+      this.rtcUserId = creatRoom ? "H" + this.selfUserId : this.selfUserId;
       self.rim
-        .joinRoom(this.selfUserId, roomId, creatRoom ? 1 : 2, token, "", "")
+        .joinRoom(this.userId, roomId, creatRoom ? 1 : 2, token, "", "")
         .then((data) => {
           if (creatRoom) {
             const { personalManager, userId } = this;
@@ -192,7 +198,7 @@ export default {
         params: {
           source: value ? 1 : 2,
           roomId: value ? this.selfUserId : this.userId,
-          userId: this.selfUserId,
+          userId: this.rtcUserId,
           streamListTemp,
           rim,
         },
