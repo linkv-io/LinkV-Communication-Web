@@ -96,6 +96,7 @@
       v-bind:source="'meet'"
       v-on:get-settings="getSettings"
     />
+    <Live v-show="isShowLive" />
   </div>
 </template>
 
@@ -104,6 +105,7 @@ import Nav from "@/components/navigate.vue";
 import Video from "@/components/video.vue";
 import Audio from "@/components/audio.vue";
 import Settings from "@/components/settings.vue";
+import Live from "@/components/live.vue";
 import * as bowser from "bowser";
 import config from "@/config/octopus.config.js";
 import { mapState } from "vuex";
@@ -115,9 +117,11 @@ export default {
     Video,
     Audio,
     Settings,
+    Live,
   },
   data() {
     return {
+      isShowLive: true,
       userId: "",
       source: 0,
       roomId: "",
@@ -270,6 +274,7 @@ export default {
     },
     async getPullStreamList() {
       for (let [index, item] of this.streamList.entries()) {
+        console.log(item.userId);
         const stream = await this.palyStream(item.userId);
         if (stream?.code == 0) {
           this.$toast({ content: `${item.userId} play failed.` });
@@ -279,6 +284,10 @@ export default {
         this.$set(this.streamList, index, item);
       }
       this.join();
+      // const self = this;
+      // setTimeout(() => {
+      //   self.join();
+      // }, 5000);
     },
     async creatPublishStream() {
       this.previewResult = await this.startPreview({
@@ -300,7 +309,6 @@ export default {
 
       this.streamList.forEach((value, key) => {
         if (value.userId == this.userId) {
-          // value.stream = this.previewResult;
           this.$set(this.streamList, key, {
             ...value,
             stream: this.previewResult,
@@ -320,7 +328,6 @@ export default {
       this.publishStream(this.previewResult);
     },
     palyStream(userId) {
-      console.log(userId);
       return this.rim.startPlayingStream(userId);
     },
     publishStream(stream) {
@@ -410,10 +417,6 @@ export default {
         }, 2000);
       });
       this.rim.on("stream-update", ({ code, streamList }) => {
-        console.log("----stream-update-----");
-        console.log(code, "-----code------");
-        console.log(streamList, "----streamList---");
-
         console.log("onStreamUpdated:::", code, streamList);
         const type = code;
         if (type == 1) {
@@ -467,6 +470,7 @@ export default {
     intervalUpdateRoom() {
       this.updateRoom("2");
       this.updateRoomTimer = setTimeout(() => {
+        console.log("222222", "-----------");
         this.intervalUpdateRoom();
       }, 5 * 1000);
     },

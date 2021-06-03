@@ -158,7 +158,14 @@ export default {
       const self = this;
       let roomId = creatRoom ? this.selfUserId : this.userId;
       self.rim
-        .joinRoom(roomId, creatRoom ? 1 : 2, token, "", "")
+        .joinRoom(
+          creatRoom ? "H" + this.selfUserId : this.selfUserId,
+          roomId,
+          creatRoom ? 1 : 2,
+          token,
+          "",
+          ""
+        )
         .then((data) => {
           if (creatRoom) {
             const { personalManager, userId } = this;
@@ -196,7 +203,7 @@ export default {
         params: {
           source: value ? 1 : 2,
           roomId: value ? this.selfUserId : this.userId,
-          userId: this.selfUserId,
+          userId: value ? "H" + this.selfUserId : this.selfUserId,
           streamListTemp,
           rim,
         },
