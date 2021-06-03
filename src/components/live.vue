@@ -27,9 +27,6 @@ export default {
     };
   },
   props: ["rim", "roomId", "userId", "list"],
-  mounted() {
-    this.onEvent(this.rim);
-  },
   methods: {
     onEnterSendMessage() {
       this.onSend();

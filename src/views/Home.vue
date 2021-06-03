@@ -74,6 +74,7 @@ import Settings from "@/components/settings.vue";
 import Nav from "@/components/navigate.vue";
 
 let { environment, imAppId, rtcAppId, appKey, token } = config;
+let selfUserId = String(getSelfUserId());
 
 export default {
   name: "Home",
@@ -85,7 +86,7 @@ export default {
       userId: "",
       rtcUserId: "",
       dialogVisible: false,
-      selfUserId: String(getSelfUserId()),
+      selfUserId,
       personalManager: "",
       liveroomManager: "",
       handleObj: {
@@ -98,6 +99,9 @@ export default {
       isShowSet: false,
       isLogin: false,
     };
+  },
+  created() {
+    // this.getToken();
   },
   components: {
     Nav,
@@ -113,6 +117,27 @@ export default {
     this.login();
   },
   methods: {
+    async getToken() {
+      try {
+        // eslint-disable-next-line no-unused-vars
+        const result = await fetch(
+          `http://10.61.153.44:27001/api/rest/getWebimToken`,
+          {
+            Headers: JSON.stringify({
+              app_id: imAppId,
+              // room_id: `${this.currentConfig.appId}-${this.roomId}`,
+              appKey,
+              userId: this.userId,
+            }),
+            method: "POST",
+          }
+        );
+        console.log(result);
+      } catch (error) {
+        console.log("+++tokenerrr+++", error);
+        this.$message.error("get token error");
+      }
+    },
     getSettings(res) {
       this.$store.commit("updateEnv", res.env);
       this.$store.commit("setResultSettingConfig", res);

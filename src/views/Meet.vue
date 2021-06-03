@@ -78,12 +78,12 @@
         @click="mute"
         v-if="source == 1 || (source == 2 && isShowJoin)"
       ></li>
-      <li
+      <!-- <li
         class="item join"
         :class="{ active: isShowJoin }"
         @click="join"
         v-if="source == 2"
-      ></li>
+      ></li> -->
       <li
         class="item record"
         :class="{ active: isActiveCamera }"
