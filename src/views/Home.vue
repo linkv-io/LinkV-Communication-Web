@@ -104,6 +104,11 @@ export default {
     Settings,
   },
   mounted() {
+    this.loadingInstance1 = this.$loading.service({
+      fullscreen: true,
+      text: "登录中",
+      background: "rgba(255, 255, 255, 0.3)",
+    });
     this.init();
     this.login();
   },
@@ -127,6 +132,7 @@ export default {
         // 异步
         await this.rim.login(this.selfUserId, token);
         this.$message.success("登录成功");
+        this.loadingInstance1.close();
         this.isLogin = true;
         const { _personalManager, _liveroomManager } = this.rim;
         this.personalManager = _personalManager;
