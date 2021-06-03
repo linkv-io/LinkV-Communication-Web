@@ -415,13 +415,13 @@ export default {
         });
         // this.octopusRTC.off('play-state-update', playCallback);
         this.playStatsTimer[streamId] = setInterval(async () => {
-          const audioResult = await this.octopusRTC.getRemoteAudioStats(
-            streamId
-          );
-          const videoResult = await this.octopusRTC.getRemoteVideoStats(
-            streamId
-          );
-          console.log("play stats result:::", audioResult, videoResult);
+          // const audioResult = await this.octopusRTC.getRemoteAudioStats(
+          //   streamId
+          // );
+          // const videoResult = await this.octopusRTC.getRemoteVideoStats(
+          //   streamId
+          // );
+          // console.log("play stats result:::", audioResult, videoResult);
         }, 2000);
       };
       this.octopusRTC.on("play-state-update", playCallback);
