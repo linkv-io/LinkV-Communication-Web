@@ -46,10 +46,9 @@ export default {
             }
             list.push({ from: self.userId, content: this.message });
             this.message = "";
-            this.$message.success("消息发送成功");
           },
           (err) => {
-            this.$message.success("消息发送失败");
+            this.$message.error("消息发送失败");
             console.log(err);
           }
         );

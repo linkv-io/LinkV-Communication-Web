@@ -122,76 +122,54 @@ export default {
         socketUrl: "wss://webimv2.fusionv.com/",
       });
     },
-    login() {
-      const self = this;
-      this.rim
-        .login(this.selfUserId, token)
-        .then(() => {
-          this.$message.success("登录成功");
-          this.isLogin = true;
-          const { _personalManager, _liveroomManager } = self.rim;
-          self.personalManager = _personalManager;
-          self.liveroomManager = _liveroomManager;
-          self.onEvent();
-        })
-        .catch((err) => {
-          this.$message.error("登录失败请重新登录");
-          console.log("登录失败", err);
-        });
+    async login() {
+      try {
+        // 异步
+        await this.rim.login(this.selfUserId, token);
+        this.$message.success("登录成功");
+        this.isLogin = true;
+        const { _personalManager, _liveroomManager } = this.rim;
+        this.personalManager = _personalManager;
+        this.liveroomManager = _liveroomManager;
+        this.onEvent();
+      } catch (error) {
+        this.$message.error("登录失败请重新登录");
+        console.log("登录失败", error);
+      }
     },
-    // 发送直播间消息
-    // sendRoom() {
-    //   this.message = "linkv_enable_mic";
-    //   window.im.liveroomManager.sendMessage(this.selfUserId, this.message).then(
-    //     (data) => {
-    //       console.log(data);
-    //     },
-    //     (err) => {
-    //       this.$message.success("消息发送失败");
-    //       console.log(err);
-    //     }
-    //   );
-    // },
     // 加入 im直播间
-    joinRoom(value) {
+    async joinRoom(value) {
       const { creatRoom } = value;
       const self = this;
-      let roomId = creatRoom ? this.selfUserId : this.userId;
-      this.rtcUserId = creatRoom ? "H" + this.selfUserId : this.selfUserId;
-      self.rim
-        .joinRoom(this.rtcUserId, roomId, creatRoom ? 1 : 2, token, "", "")
-        .then((data) => {
-          if (creatRoom) {
-            const { personalManager, userId } = this;
-            if (personalManager && userId) {
-              let msg = { isAudio: false, extra: "", accept: true };
-              let content = JSON.stringify(msg);
-              let type = "linkv_anwser_call";
-              personalManager
-                .sendEventMessage(userId, content, type)
-                .then((res) => {
-                  console.log(res);
-                  console.log("发送同意或拒绝消息成功");
-                })
-                .catch((err) => {
-                  console.log("发送同意或拒绝消息失败", err);
-                  this.$message.error("发送同意或拒绝消息失败");
-                });
-            } else {
-              this.$message.error("请选择要发送的用户");
-            }
-          }
-          self.$refs.audio.pause();
-          self.goMeet(creatRoom, data, self.rim);
-        })
-        .catch((err) => {
-          self.$refs.audio.pause();
-          console.log(err, "创建直播间失败");
-          this.$message.error("创建直播间失败,请重新创建");
-        });
+      if (creatRoom) {
+        this.roomId = this.selfUserId;
+        this.rtcUserId = "H" + this.selfUserId;
+      } else {
+        this.roomId = this.userId;
+        this.rtcUserId = this.selfUserId;
+      }
+      try {
+        let streamListTemp = await this.rim.joinRoom(
+          this.rtcUserId,
+          this.roomId,
+          creatRoom ? 1 : 2,
+          token,
+          "",
+          ""
+        );
+        if (creatRoom) {
+          let content = { isAudio: false, extra: "", accept: true };
+          let type = "linkv_anwser_call";
+          await this.sendEventMessage(content, type);
+        }
+        this.$refs.audio.pause();
+        this.goMeet(creatRoom, streamListTemp, self.rim);
+      } catch (error) {
+        console.log(error);
+        this.$message.error("加入房间失败");
+      }
     },
     goMeet(value, streamListTemp, rim) {
-      console.log(streamListTemp, "streamListTemp");
       this.$router.push({
         name: "Meet",
         params: {
@@ -203,27 +181,33 @@ export default {
         },
       });
     },
+    sendEventMessage(content, type) {
+      const { personalManager, userId } = this;
+      if (personalManager && userId) {
+        content = JSON.stringify(content);
+        console.log("++++sendEventManager++++", userId, content, type);
+        return personalManager.sendEventMessage(userId, content, type);
+      }
+    },
+
     // 函数
-    call() {
+    async call() {
       const { personalManager, userId } = this;
       if (personalManager && userId) {
         this.isCall = true;
-        let msg = { isAudio: false, extra: "" };
-        let content = JSON.stringify(msg);
+        let content = { isAudio: false, extra: "" };
         let type = "linkv_video_call";
-        const self = this;
-        personalManager
-          .sendEventMessage(userId, content, type)
-          .then(() => {
-            this.dialogVisible = true;
-            setTimeout(() => {
-              self.$refs.audio.play();
-            });
-          })
-          .catch((err) => {
-            console.log("发送呼叫消息失败", err);
-            this.$message.error("发送呼叫消息失败,请重新呼叫");
+        try {
+          const self = this;
+          await this.sendEventMessage(content, type);
+          this.dialogVisible = true;
+          setTimeout(() => {
+            self.$refs.audio.play();
           });
+        } catch (error) {
+          console.log("发送呼叫消息失败", error);
+          this.$message.error("发送呼叫消息失败,请重新呼叫");
+        }
       } else {
         this.$message.error("请选择要发送的用户");
       }
@@ -239,7 +223,6 @@ export default {
     // 拒绝
     refuse() {
       this.$refs.audio.pause();
-      this.dialogVisible = false;
       if (this.isCall) {
         this.hangUp();
       } else {
@@ -247,42 +230,22 @@ export default {
       }
     },
     //主动挂断
-    hangUp() {
-      const { personalManager, userId } = this;
-      if (personalManager && userId) {
-        let msg = { extra: "" };
-        let content = JSON.stringify(msg);
+    async hangUp() {
+      const { userId } = this;
+      if (userId) {
+        let content = { extra: "" };
         let type = "linkv_hangup_call";
-        personalManager
-          .sendEventMessage(userId, content, type)
-          .then((res) => {
-            console.log(res);
-            this.$message.success("发送主动挂断消息成功");
-          })
-          .catch((err) => {
-            console.log("发送主动挂断消息失败", err);
-            this.$message.error("发送主动挂断消息失败");
-          });
+        try {
+          await this.sendEventMessage(content, type);
+          this.dialogVisible = false;
+        } catch (error) {
+          console.log("发送主动挂断消息失败", error);
+          this.$message.error("发送主动挂断消息失败");
+        }
       } else {
-        this.$message.error("请选择要发送的用户");
+        this.$message.error("请选择需要发送的用户");
       }
     },
-    sendEventMessage(content, type) {
-      const { personalManager, userId } = this;
-      if (personalManager && userId) {
-        personalManager
-          .sendEventMessage(userId, content, type)
-          .then((res) => {
-            console.log(res);
-            console.log("发送同意或拒绝消息成功");
-          })
-          .catch((err) => {
-            console.log("发送同意或拒绝消息失败", err);
-            this.$message.error("发送同意或拒绝消息失败");
-          });
-      }
-    },
-
     // 同意或拒绝呼叫
     receiveAndRefuse(accept) {
       if (accept) {
@@ -397,7 +360,6 @@ export default {
       .content-logo {
         width: 170px;
         height: 170px;
-        // background: url("../assets/icon_bg@2x.png") no-repeat;
         background-size: contain;
         border-radius: 50%;
         margin: 80px auto 0 auto;
