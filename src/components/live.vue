@@ -74,7 +74,7 @@ export default {
       overflow-y: auto;
       .content-item {
         display: flex;
-        justify-content: start;
+        justify-content: flex-start;
         margin: 10px 10px 0 19px;
         font-size: 14px;
         font-family: PingFangSC-Semibold, PingFang SC;

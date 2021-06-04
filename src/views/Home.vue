@@ -72,10 +72,10 @@ import config from "../config";
 import { getSelfUserId } from "../utils/util";
 import Settings from "@/components/settings.vue";
 import Nav from "@/components/navigate.vue";
-
 let { environment, imAppId, rtcAppId, appKey, token } = config;
-let selfUserId = String(getSelfUserId());
+// let { environment, token } = config;
 
+let selfUserId = String(getSelfUserId());
 export default {
   name: "Home",
   data() {
@@ -108,7 +108,7 @@ export default {
     Settings,
   },
   mounted() {
-    this.loadingInstance1 = this.$loading.service({
+    this.isLoading = this.$loading.service({
       fullscreen: true,
       text: "登录中",
       background: "rgba(255, 255, 255, 0.3)",
@@ -142,28 +142,37 @@ export default {
       this.$store.commit("setResultSettingConfig", res);
     },
     init() {
+      // this.rim = new window.RIM({
+      //   appId:
+      //     "3AA052D3C91F66A94AE5FC4BDBE39A398274C5AF2410F5C3DB86E0FBA61DBF915915297CDCB1392B29DCE8A81987F9B8EBA6E877E3551BDF36691E627F132EA95BF998E3E616E2177A1F6C2B28FB6BE8E7071C2F5701F59DFA9EB2F0866C6FFF1FD46F26311D396AFC302B89B6B6E5ABB433E9112B2B902786936AEF8A8B5DA2DEC5906BF9CA6655908CDC26829C1A6FFEA46150EAA763CB63519343A01BDD7A71CA537154662AC88FDB19A0BE70C2629A6CEA4FFFD93D77D8434C098D8F4AB89D879686F00D8EC8EA1E033C3EBFB7E4259F37351965142F58DA1506B1230C4F3F50EC2D9E66A06D361F5A767804F35E6DF3D086E078CB7348A5F267552BA4473182F79BC072C92A84950259C86BD699FC6E86999816641446D516AF983D2670A3AF75ECFC1F743B720605A412021133E5CCE3DC5FE44959C60A7656029F51774CD177A46C2974F388741A948AE99780652CD3D58017F132A2C37ACB38CDFEA5543C961A0A6DF7D16C6745D3062AC0E0FBEA8470CBC9E137A8400B7D23A0C2737A32D14634223C2C7CFE4867752DDB346C271C23D82E92264AFA33B7170EFA0DC1648942F7A8937C3B0AF9BACAD9BB16",
+      //   appKey: "YpqpJT2NG9zIrkI1N9SiAgXuA2xd8RMj",
+      //   environment,
+      //   userId: this.selfUserId,
+      //   socketUrl: "wss://webimv2.fusionv.com/",
+      // });
       this.rim = new window.RIM({
+        // appId:'YpqpJT2NG9zIrkI1N9SiAgXuA2xd8RMj',
         imAppId,
         rtcAppId,
         appKey,
         environment,
         userId: this.selfUserId,
-        socketUrl: "wss://webimv2.fusionv.com/",
+        // socketUrl: "wss://webimv2.fusionv.com/",
+        socketUrl:'10.61.153.49:10002'
       });
     },
     async login() {
       try {
-        // 异步
         await this.rim.login(this.selfUserId, token);
         this.$message.success("登录成功");
-        this.loadingInstance1.close();
+        this.isLoading.close();
         this.isLogin = true;
         const { _personalManager, _liveroomManager } = this.rim;
         this.personalManager = _personalManager;
         this.liveroomManager = _liveroomManager;
         this.onEvent();
       } catch (error) {
-        this.loadingInstance1.close();
+        this.isLoading.close();
         this.$message.error("登录失败请重新登录");
         console.log("登录失败", error);
       }
@@ -216,15 +225,14 @@ export default {
       const { personalManager, userId } = this;
       if (personalManager && userId) {
         content = JSON.stringify(content);
-        console.log("++++sendEventManager++++", userId, content, type);
         return personalManager.sendEventMessage(userId, content, type);
+      } else {
+        this.$message.error("请选择要发送的用户");
       }
     },
 
     // 函数
     async call() {
-      const { personalManager, userId } = this;
-      if (personalManager && userId) {
         this.isCall = true;
         let content = { isAudio: false, extra: "" };
         let type = "linkv_video_call";
@@ -239,9 +247,6 @@ export default {
           console.log("发送呼叫消息失败", error);
           this.$message.error("发送呼叫消息失败,请重新呼叫");
         }
-      } else {
-        this.$message.error("请选择要发送的用户");
-      }
     },
     // 接收
     receive() {
