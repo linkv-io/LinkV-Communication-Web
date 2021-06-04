@@ -205,19 +205,19 @@ export default {
     async pageInit() {
       const routerParams = this.$route.params;
       // eslint-disable-next-line no-unused-vars
-      const { roomId, userId, streamListTemp, rim } = routerParams;
-      this.rim = rim;
-      this.octopusRTC = this.rim._octopusRTC;
-      this.roomId = roomId;
-      this.userId = userId;
-      let env = "prod";
-      this.handleCallbackFun();
-      this.onEvent();
       if (routerParams.source == void 0) {
         this.$router.push({ name: "Home" });
         return;
       } else {
-        this.source = routerParams.source; // 1为推流 2为拉流 3为水晶球展示
+        const { roomId, userId, streamListTemp, rim, source } = routerParams;
+        this.rim = rim;
+        this.octopusRTC = this.rim._octopusRTC;
+        this.roomId = roomId;
+        this.userId = userId;
+        this.source = source; // 1为推流 2为拉流 3为水晶球展示
+        let env = "prod";
+        this.handleCallbackFun();
+        this.onEvent();
         if (this.source == 1 || this.source == 2) {
           this.currentConfig = {
             ...this.resultSettingConfig,
@@ -247,11 +247,6 @@ export default {
         console.log("loginSuccess:::", this.streamList);
         this.createVideoElement();
       }
-    },
-    getQueryString(key) {
-      var t = new RegExp("(^|&)" + key + "=([^&]*)(&|$)", "i"),
-        n = window.location.search.substr(1).split("?")[0].match(t);
-      return null != n ? decodeURIComponent(n[2]) : null;
     },
     createVideoElement() {
       if (this.direction == "push" || this.isShowJoin) {
@@ -297,10 +292,6 @@ export default {
         this.$set(this.streamList, index, item);
       }
       this.join();
-      // const self = this;
-      // setTimeout(() => {
-      //   self.join();
-      // }, 5000);
     },
     async creatPublishStream() {
       this.previewResult = await this.startPreview({
@@ -363,9 +354,10 @@ export default {
       const list = this.list;
       // 直播间消息
       liveroomManager.on("message", (value) => {
+        console.log(value, "直播间消息");
         this.isShowLive = true;
         if (list.length > 10) {
-          list.pop();
+          list.shift();
           list.push(value);
         } else {
           list.push(value);
@@ -413,7 +405,6 @@ export default {
             console.log("onPlayStateUpdate:::", this.streamList);
           }
         });
-        // this.octopusRTC.off('play-state-update', playCallback);
         this.playStatsTimer[streamId] = setInterval(async () => {
           // const audioResult = await this.octopusRTC.getRemoteAudioStats(
           //   streamId
@@ -435,16 +426,7 @@ export default {
             clearInterval(this.publishStatsTimer[streamId]);
           }
           const type = code;
-          if (type == 1) {
-            if (this.source == 1) {
-              this.updateRoom("1");
-              setTimeout(() => {
-                this.intervalUpdateRoom();
-              }, 500);
-            }
-          } else if (type == 2) {
-            // this.publishStream();
-          } else if (type == 0) {
+          if (type == 0) {
             this.$toast({ content: `${streamId}推流失败。` });
           }
           this.publishStatsTimer[streamId] = setInterval(async () => {
@@ -505,79 +487,6 @@ export default {
           }
         }
       });
-      // this.octopusRTC.onStreamUpdated = (type, streamList) => {
-
-      // };
-    },
-    intervalUpdateRoom() {
-      this.updateRoom("2");
-      this.updateRoomTimer = setTimeout(() => {
-        console.log("222222", "-----------");
-        this.intervalUpdateRoom();
-      }, 5 * 1000);
-    },
-    async getAuthExpire() {
-      const res = await fetch(`${this.currentConfig.AUTHURL}/auth`);
-      return {
-        auth: res.auth,
-        expire: res.expire_ts,
-      };
-    },
-    async getOctopusToken() {
-      const response = await fetch(
-        `${this.currentConfig.BXMUrl}/api/v1/get_octopus_token`,
-        {
-          body: JSON.stringify({
-            app_id: this.currentConfig.appId,
-            user_id: this.userId,
-          }),
-          method: "POST",
-        }
-      );
-      const result = await response.json();
-      return result.data && result.data.token;
-    },
-    async getLiveRoomId() {
-      try {
-        const result = await fetch(
-          `${this.currentConfig.BXMUrl}/api/v1/gen_room`,
-          {
-            body: JSON.stringify({
-              app_id: this.currentConfig.appId,
-            }),
-            method: "POST",
-          }
-        );
-
-        const res = await result.json();
-        this.roomId = res.data.room_id;
-        this.userId = `H${this.userId}`;
-        if (this.scene == "audio") {
-          this.roomId = `A${this.roomId}`;
-        } else {
-          this.roomId = `M${this.roomId}`;
-        }
-        // return result.json();
-      } catch (e) {
-        this.$toast({ content: "网络开小差了，请稍等再重试哟~" });
-      }
-    },
-    async updateRoom(status) {
-      console.log("updateRoom:::", status, this.currentConfig.BXMUrl);
-      const result = await fetch(
-        `${this.currentConfig.BXMUrl}/api/v1/update_room`,
-        {
-          body: JSON.stringify({
-            app_id: this.currentConfig.appId,
-            // room_id: `${this.currentConfig.appId}-${this.roomId}`,
-            room_id: `${this.roomId}`,
-            status: status,
-          }),
-          method: "POST",
-        }
-      );
-
-      return result.json();
     },
     foldFun() {
       if (this.isShowRightList) {
@@ -644,7 +553,7 @@ export default {
         }
       }
     },
-    mute() {
+    async mute() {
       console.log("click mute:::");
       if (this.isActiveMute) {
         this.isActiveMute = false;
@@ -655,6 +564,12 @@ export default {
         this.octopusRTC.muteSwitch(this.userId, true);
         this.$toast({ content: "已静音" });
       }
+      let type = "linkv_enable_mic";
+      await this.rim.liveroomManager.sendDIYMessage(
+        this.roomId,
+        this.isActiveMute ? "1" : "0",
+        type
+      );
     },
     join() {
       if (!this.isShowJoin) {
@@ -672,14 +587,17 @@ export default {
         }
       }
     },
-    record() {
+    async record() {
       console.log("click record:::");
+      let type = "linkv_enable_video";
       if (this.isActiveCamera) {
         this.isActiveCamera = false;
         this.rim.cameraSwitch(this.userId, "open");
+        await this.rim.liveroomManager.sendDIYMessage(this.roomId, "1", type);
       } else {
         this.isActiveCamera = true;
         this.rim.cameraSwitch(this.userId, "close");
+        await this.rim.liveroomManager.sendDIYMessage(this.roomId, "0", type);
       }
     },
     set() {
@@ -766,13 +684,8 @@ export default {
     },
     close() {
       console.log("click close:::", this.streamList, this.isShowJoin);
-      clearTimeout(this.updateRoomTimer);
-      if (this.source == 1) {
-        this.updateRoom("3");
-      }
       this.isClosed = true;
-      // eslint-disable-next-line no-unused-vars
-      this.streamList.forEach((value, key, arr) => {
+      this.streamList.forEach((value) => {
         if (value.userId == this.userId) {
           this.stopPublishStream();
         } else {

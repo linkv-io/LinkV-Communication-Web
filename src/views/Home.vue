@@ -101,7 +101,7 @@ export default {
     };
   },
   created() {
-    // this.getToken();
+    this.getToken();
   },
   components: {
     Nav,
@@ -121,13 +121,12 @@ export default {
       try {
         // eslint-disable-next-line no-unused-vars
         const result = await fetch(
-          `http://10.61.153.44:27001/api/rest/getWebimToken`,
+          `https://catchu-im-api.fusionv.com/api/rest/getWebimToken`,
           {
             Headers: JSON.stringify({
-              app_id: imAppId,
-              // room_id: `${this.currentConfig.appId}-${this.roomId}`,
-              appKey,
-              userId: this.userId,
+              appid: "9K0YmleBXINt8BG92obtow==",
+              appKey: "7VVuST4bp1dNe8MxZgFciw==",
+              userid: this.userId,
             }),
             method: "POST",
           }
@@ -164,6 +163,7 @@ export default {
         this.liveroomManager = _liveroomManager;
         this.onEvent();
       } catch (error) {
+        this.loadingInstance1.close();
         this.$message.error("登录失败请重新登录");
         console.log("登录失败", error);
       }
@@ -278,9 +278,19 @@ export default {
       }
     },
     // 同意或拒绝呼叫
-    receiveAndRefuse(accept) {
+    async receiveAndRefuse(accept) {
       if (accept) {
         this.joinRoom({ creatRoom: true });
+      } else {
+        this.dialogVisible = false;
+        let accept = false;
+        let content = { isAudio: false, extra: "", accept: accept };
+        let type = "linkv_anwser_call";
+        try {
+          await this.sendEventMessage(content, type);
+        } catch (error) {
+          this.$message.error("挂断消息失败");
+        }
       }
     },
     videoHandle(content, from) {
@@ -304,7 +314,7 @@ export default {
       if (accept) {
         setTimeout(() => {
           self.joinRoom({ createRoom: false });
-        }, 3000);
+        }, 5000);
       } else {
         this.$refs.audio.pause();
         this.dialogVisible = false;
@@ -341,6 +351,9 @@ export default {
         });
       }
     },
+  },
+  destroyed() {
+    console.log("destroyed");
   },
 };
 </script>
