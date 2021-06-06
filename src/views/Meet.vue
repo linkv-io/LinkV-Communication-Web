@@ -233,16 +233,16 @@ export default {
             this.direction = "pull";
             break;
         }
-        if (streamListTemp.length != 0) {
-          streamListTemp.forEach((value, key) => {
-            if (value.userId.indexOf("H") != -1 && key != 0) {
-              const temp = streamListTemp[0];
-              this.$set(streamListTemp, 0, value);
-              streamListTemp[key] = temp;
-              streamListTemp["stream"] = null;
-            }
-          });
-        }
+        // if (streamListTemp.length != 0) {
+        //   streamListTemp.forEach((value, key) => {
+        //     if (value.userId.indexOf("H") != -1 && key != 0) {
+        //       const temp = streamListTemp[0];
+        //       this.$set(streamListTemp, 0, value);
+        //       streamListTemp[key] = temp;
+        //       streamListTemp["stream"] = null;
+        //     }
+        //   });
+        // }
         this.streamList = streamListTemp;
         console.log("loginSuccess:::", this.streamList);
         this.createVideoElement();
@@ -358,6 +358,7 @@ export default {
         this.isShowLive = true;
         if (list.length > 10) {
           list.shift();
+          console.log(list);
           list.push(value);
         } else {
           list.push(value);
@@ -462,29 +463,32 @@ export default {
             this.isShowRightList = true;
           }
         } else if (type == 0) {
-          this.streamList.forEach((value, key) => {
-            if (value.userId == streamList[0].userId) {
-              if (value.userId.indexOf("H") != -1) {
-                this.$toast({ content: this.$t("m.anchorleave") });
-                setTimeout(() => {
+               setTimeout(() => {
                   this.close();
                 }, 2000);
-              } else {
-                this.streamList.splice(key, 1);
-                this.rim.stopPlayingStream(value.userId);
-                this.$toast({
-                  content: `${streamList[0].userId}${this.$t("m.leaveRoom")}`,
-                });
-                clearInterval(this.playStatsTimer[value.userId]);
-              }
-            }
-          });
-          if (this.streamList.length == 0) {
-            this.$toast({ content: this.$t("m.nobody") });
-            setTimeout(() => {
-              this.close();
-            }, 2000);
-          }
+          // this.streamList.forEach((value, key) => {
+          //   if (value.userId == streamList[0].userId) {
+          //     if (value.userId.indexOf("H") != -1) {
+          //       this.$toast({ content: this.$t("m.anchorleave") });
+          //       setTimeout(() => {
+          //         this.close();
+          //       }, 2000);
+          //     } else {
+          //       this.streamList.splice(key, 1);
+          //       this.rim.stopPlayingStream(value.userId);
+          //       this.$toast({
+          //         content: `${streamList[0].userId}${this.$t("m.leaveRoom")}`,
+          //       });
+          //       clearInterval(this.playStatsTimer[value.userId]);
+          //     }
+          //   }
+          // });
+          // if (this.streamList.length == 0) {
+          //   this.$toast({ content: this.$t("m.nobody") });
+          //   setTimeout(() => {
+          //     this.close();
+          //   }, 2000);
+          // }
         }
       });
     },

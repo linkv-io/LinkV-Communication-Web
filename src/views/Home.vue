@@ -174,7 +174,8 @@ export default {
       const self = this;
       if (creatRoom) {
         this.roomId = this.selfUserId;
-        this.rtcUserId = "H" + this.selfUserId;
+        // this.rtcUserId = "H" + this.selfUserId;
+        this.rtcUserId = this.selfUserId;
       } else {
         this.roomId = this.userId;
         this.rtcUserId = this.selfUserId;
