@@ -84,7 +84,7 @@ export default {
       im: null,
       isCall: true,
       userId: "",
-      rtcUserId: "",
+      // rtcUserId: "",
       dialogVisible: false,
       selfUserId,
       personalManager: "",
@@ -174,15 +174,12 @@ export default {
       const self = this;
       if (creatRoom) {
         this.roomId = this.selfUserId;
-        // this.rtcUserId = "H" + this.selfUserId;
-        this.rtcUserId = this.selfUserId;
       } else {
         this.roomId = this.userId;
-        this.rtcUserId = this.selfUserId;
       }
       try {
         let streamListTemp = await this.rim.joinRoom(
-          this.rtcUserId,
+          this.selfUserId,
           this.roomId,
           creatRoom ? 1 : 2,
           token,
@@ -207,7 +204,7 @@ export default {
         params: {
           source: value ? 1 : 2,
           roomId: value ? this.selfUserId : this.userId,
-          userId: this.rtcUserId,
+          userId: this.selfUserId,
           streamListTemp,
           rim,
         },
