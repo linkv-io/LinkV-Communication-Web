@@ -141,7 +141,7 @@ export default {
       currentConfig: {},
       videoMuted: false,
       isShowRightList: true,
-      isShowJoin: false,
+      isShowJoin: true,
       isShowSet: false,
       isActiveMute: false,
       isActiveCamera: false,
@@ -209,12 +209,19 @@ export default {
         this.$router.push({ name: "Home" });
         return;
       } else {
-        const { roomId, userId, streamListTemp, lvcEngine, source } =
-          routerParams;
+        const {
+          roomId,
+          userId,
+          streamListTemp,
+          lvcEngine,
+          source,
+          peerUserId,
+        } = routerParams;
         this.lvcEngine = lvcEngine;
         this.octopusRTC = this.lvcEngine._octopusRTC;
         this.roomId = roomId;
         this.userId = userId;
+        this.peerUserId = peerUserId;
         this.source = source; // 1为推流 2为拉流
         let env = "prod";
         this.handleCallbackFun();
@@ -240,49 +247,29 @@ export default {
       }
     },
     createVideoElement() {
-      if (this.direction == "push" || this.isShowJoin) {
-        if (this.streamList.length > 1) {
-          const temp = this.streamList[1];
-          this.$set(this.streamList, 1, {
-            userId: this.userId,
-            streamId: this.userId,
-            roomId: this.roomId,
-          });
-          this.streamList.push(temp);
-        } else {
-          this.streamList.push({
-            userId: this.userId,
-            streamId: this.userId,
-            roomId: this.roomId,
-          });
-        }
-        this.$nextTick(() => {
-          this.creatPublishStream();
-        });
-      } else {
-        if (!this.streamList.length) {
-          console.log(this.$t("m.nobody"));
-          this.$toast({ content: this.$t("m.nobody") });
-          setTimeout(() => {
-            this.close();
-          }, 500);
-          return;
-        }
-        this.getPullStreamList();
-      }
+      this.streamList.push({
+        userId: this.userId,
+        streamId: this.userId,
+        roomId: this.roomId,
+      });
+      this.$nextTick(() => {
+        this.creatPublishStream();
+      });
+      this.getPullStreamList();
     },
     async getPullStreamList() {
       for (let [index, item] of this.streamList.entries()) {
         console.log(item.userId);
-        const stream = await this.palyStream(item.userId);
-        if (stream?.code == 0) {
-          this.$toast({ content: `${item.userId} play failed.` });
+        if (item.userId != this.userId) {
+          const stream = await this.palyStream(item.userId);
+          if (stream?.code == 0) {
+            this.$toast({ content: `${item.userId} play failed.` });
+          }
+          console.log("pull play stream:::", stream);
+          this.$set(item, "stream", stream);
+          this.$set(this.streamList, index, item);
         }
-        console.log("pull play stream:::", stream);
-        this.$set(item, "stream", stream);
-        this.$set(this.streamList, index, item);
       }
-      this.join();
     },
     async creatPublishStream() {
       this.previewResult = await this.startPreview({
@@ -368,6 +355,16 @@ export default {
         this.$message.warning(`用户${value.userId}创建的直播间`);
       });
     },
+    sendEventMessage(content, type) {
+      const { peerUserId } = this;
+      const { personalManager } = this.lvcEngine;
+      if (personalManager && peerUserId) {
+        content = JSON.stringify(content);
+        return personalManager.sendEventMessage(peerUserId, content, type);
+      } else {
+        this.$message.error("请选择要发送的用户");
+      }
+    },
     handleCallbackFun() {
       this.octopusRTC.on("disconnect", async (err) => {
         console.log("handleDisconnect:::", err);
@@ -412,7 +409,7 @@ export default {
       // add by version2.0.0
       this.octopusRTC.on(
         "publish-state-update",
-        ({ code, streamId, state }) => {
+        async ({ code, streamId, state }) => {
           console.log("event emit publisherStateUpdate", code, state);
           if (this.publishStatsTimer[streamId]) {
             clearInterval(this.publishStatsTimer[streamId]);
@@ -420,6 +417,11 @@ export default {
           const type = code;
           if (type == 0) {
             this.$toast({ content: `${streamId}推流失败。` });
+          } else {
+            console.log("推流成功");
+            let content = { isAudio: false, extra: "", accept: true };
+            let type = "linkv_anwser_call";
+            await this.sendEventMessage(content, type);
           }
           this.publishStatsTimer[streamId] = setInterval(async () => {
             const audioResult = await this.octopusRTC.getLocalAudioStats(
@@ -543,22 +545,22 @@ export default {
         type
       );
     },
-    join() {
-      if (!this.isShowJoin) {
-        this.isShowJoin = true;
-        this.createVideoElement();
-      } else {
-        this.isShowJoin = false;
-        this.stopPublishStream();
-        this.streamList.splice(1, 1);
-        if (this.isActiveMute) {
-          this.isActiveMute = false;
-        }
-        if (this.isActiveCamera) {
-          this.isActiveCamera = false;
-        }
-      }
-    },
+    // join() {
+    //   if (!this.isShowJoin) {
+    //     this.isShowJoin = true;
+    //     this.createVideoElement();
+    //   } else {
+    //     this.isShowJoin = false;
+    //     this.stopPublishStream();
+    //     this.streamList.splice(1, 1);
+    //     if (this.isActiveMute) {
+    //       this.isActiveMute = false;
+    //     }
+    //     if (this.isActiveCamera) {
+    //       this.isActiveCamera = false;
+    //     }
+    //   }
+    // },
     async record() {
       console.log("click record:::");
       let type = "linkv_enable_video";

@@ -158,17 +158,13 @@ export default {
       await this.getInfo();
       await this.getToken();
       // const { im, rtc } = this.info.data;
-      console.log(this.token);
-      console.log(imAppId);
-      console.log(rtcAppId);
-      console.log(appKey);
       this.lvcEngine = new window.LVCEngine({
         imAppId,
         rtcAppId,
         appKey,
         userId: this.selfUserId,
-        // socketUrl: "wss://webimv2.fusionv.com/",
-        socketUrl: "ws://10.61.153.49:10002",
+        socketUrl: "wss://webimv2.fusionv.com/",
+        // socketUrl: "ws://10.61.153.49:10002",
         token: this.token,
       });
       this.login();
@@ -226,6 +222,7 @@ export default {
           userId: this.selfUserId,
           streamListTemp,
           lvcEngine,
+          peerUserId: this.userId,
         },
       });
     },
@@ -327,7 +324,7 @@ export default {
       if (accept) {
         setTimeout(() => {
           self.joinRoom({ createRoom: false });
-        }, 5000);
+        },1000);
       } else {
         this.$refs.audio.pause();
         this.dialogVisible = false;

@@ -19,13 +19,7 @@
 * Web 站点必须为 localhost 或 https
 
 
-## 2.1 获取 im 和 rtc appId 和 appkey(只有 im 使用) 
-```js
-
-
-```
-
-## 2.2 初始化SDK
+## 2.1 初始化SDK
 
 ```js
 
@@ -65,7 +59,7 @@ const async init = ()=>{
  }
  
 ```
-## 2.3 登录SDK
+## 2.2 登录SDK
 
 ```js
 lvcEngine.login().then((res)=>{
@@ -75,7 +69,7 @@ lvcEngine.login().then((res)=>{
 })
 ```
 
-## 2.4 设置IM私信事件监听
+## 2.3 设置IM私信事件监听
 
 > 建议在初始化**sdk**时注册 IM 事件，如不注册，私信消息和房间消息都将无法收到。
 
@@ -86,7 +80,7 @@ const  { personalManager} = lvcEngine
     })
 ```
 
-## 2.5 发送私信事件消息
+## 2.4 发送私信事件消息
 
 `私信:`即点对点IM消息，发送给指定userId的用户
 
