@@ -34,11 +34,11 @@
           url: "/linkv_decrypt",
           baseURL: "https://linkv-rtc-web.linkv.fun/",
         });
-        this.info = result;
+        console.log(result)
       } catch (error) {
         console.log("getInfo error", error);
       }
-    },
+    }
 ```
 
 
@@ -213,8 +213,9 @@ lvcEngine.stopPlayingStream(userId).then(()=>{
 lvcEngine.logout()
 ```
 
-# 三 api 接口文档
+# 四 api 接口文档
 
+详细的 api 接口文档请点击[查看](https://doc-zh.linkv.sg/web/chat/api)
 
 
 
