@@ -39,7 +39,7 @@ export default {
           () => {
             const list = this.list;
             if (list.length > 10) {
-              list.pop();
+              list.shift();
             }
             list.push({ from: self.userId, content: this.message });
             this.message = "";
