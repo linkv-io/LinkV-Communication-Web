@@ -117,11 +117,7 @@ let lvcEngine.joinRoom(roomId,role);
  *  type 消息类型
 */
 
-let lvcEngine.liveroomManager.sendDIYMessage(
-          roomId,
-          content,
-          type
-        );
+let lvcEngine.liveroomManager.sendDIYMessage(roomId,content,type);
 ```
 
 注册 IM 和音视频事件回调
