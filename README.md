@@ -24,7 +24,7 @@
 /***
  * appId      通过开发者平台获取
  * appSecret  通过开发者平台获取
- * return data  
+ * return data (为了安全起见,获取方式需要放到服务端)
  */
    async getInfo() {
       try {
@@ -73,11 +73,11 @@ lvcEngine.login().then((res)=>{
 ```js
 const  { personalManager} = lvcEngine
     personalManager.on("message",(value)=>{
-
+      console.log(value)
     })
 ```
 
-## 2.5 发送私信
+## 2.5 发送私信事件消息
 
 `私信:`即点对点IM消息，发送给指定userId的用户
 
@@ -102,7 +102,7 @@ personalManager.sendEventMessage(userId,content,type).then(res=>{
 ```js
 /**
  *  roomId 用户id
- *  role  1 2 角色
+ *  role  1 主播 2 非主播
 */
 
 let lvcEngine.joinRoom(roomId,role);
@@ -166,7 +166,7 @@ liveroomManager.on("message",(value)=>{
 
 ```
 
-## 3.2 添加预览视图并往服务器推流
+## 3.3 添加预览视图并往服务器推流
 
 在**登录房间成功的回调**里 `添加预览视图` 和 `推流`
 
@@ -185,7 +185,7 @@ funtion async publishStream(streamId){
 }
 ```
 
-## 3.3 拉取或者停止拉取房间中其他人的视频流
+## 3.4 拉取或者停止拉取房间中其他人的视频流
 
 在 `stream-update` 这个回调中拉取或者停止拉取他人的视频流
 
@@ -211,7 +211,7 @@ lvcEngine.stopPlayingStream(userId).then(()=>{
 })
 ```
 
-## 3.4 退出房间
+## 3.5 退出房间
 
 ```js
 lvcEngine.logout()
