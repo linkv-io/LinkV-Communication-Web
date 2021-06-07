@@ -206,7 +206,7 @@ lvcEngine.stopPlayingStream(userId).then(()=>{
 })
 ```
 
-## 3.5 退出房间
+## 3.4 退出房间
 
 ```js
 lvcEngine.logout()
