@@ -324,7 +324,7 @@ export default {
       if (accept) {
         setTimeout(() => {
           self.joinRoom({ createRoom: false });
-        },1000);
+        }, 5000);
       } else {
         this.$refs.audio.pause();
         this.dialogVisible = false;

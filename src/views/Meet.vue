@@ -418,10 +418,10 @@ export default {
           if (type == 0) {
             this.$toast({ content: `${streamId}推流失败。` });
           } else {
-            console.log("推流成功");
-            let content = { isAudio: false, extra: "", accept: true };
-            let type = "linkv_anwser_call";
-            await this.sendEventMessage(content, type);
+            // console.log("推流成功");
+            // let content = { isAudio: false, extra: "", accept: true };
+            // let type = "linkv_anwser_call";
+            // await this.sendEventMessage(content, type);
           }
           this.publishStatsTimer[streamId] = setInterval(async () => {
             const audioResult = await this.octopusRTC.getLocalAudioStats(
