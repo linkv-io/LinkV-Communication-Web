@@ -234,16 +234,6 @@ export default {
             this.direction = "pull";
             break;
         }
-        // if (streamListTemp.length != 0) {
-        //   streamListTemp.forEach((value, key) => {
-        //     if (value.userId.indexOf("H") != -1 && key != 0) {
-        //       const temp = streamListTemp[0];
-        //       this.$set(streamListTemp, 0, value);
-        //       streamListTemp[key] = temp;
-        //       streamListTemp["stream"] = null;
-        //     }
-        //   });
-        // }
         this.streamList = streamListTemp;
         console.log("loginSuccess:::", this.streamList);
         this.createVideoElement();

@@ -1,6 +1,6 @@
 # LinkV-Communication
 
-此SDK主要是对 LinkV [音视频SDK](https://doc-zh.linkv.sg/web/rtc/api)和 [IM SDK](https://doc-zh.linkv.sg/web/im/api)的一层封装，使其接口更加简单易用。所有封装的代码都在 `LVCEngine` 文件夹下，您可以参考此文档或者 [demo](https://linkv-rtc-web.linkv.fun/) 来实现功能。当然您也可以在项目中直接引用[LinkV音视频SDK](https://doc-zh.linkv.sg/web/rtc/api)和[IM SDK](https://doc-zh.linkv.sg/web/im/api)相关的类来实现更加复杂的功能。
+此SDK主要是对 LinkV [音视频SDK](https://doc-zh.linkv.sg/web/rtc/api)和 [IM SDK](https://doc-zh.linkv.sg/web/im/api)的一层封装，使其接口更加简单易用。所有封装的代码都在 `LVCEngine` 文件夹下，您可以参考此文档或者 [demo](https://linkv-rtc-web.linkv.fun/) 来实现功能。当然您也可以在项目中直接引用LinkV [音视频SDK](https://doc-zh.linkv.sg/web/rtc/api)和[IM SDK](https://doc-zh.linkv.sg/web/im/api)相关的类来实现更加复杂的功能。
 
 # 一、如何集成
 
@@ -21,20 +21,21 @@
 ## 2.1 获取 im 和 rtc appId 和 appkey(只有 im 使用) 
 ```js
 /***
- * appId  通过开发
- * appSecret  appSecret
+ * appId      通过开发者平台获取
+ * appSecret  通过开发者平台获取
+ * return data  
  */
    async getInfo() {
       try {
-        const result = await this.$http({
+        const data = await this.$http({
           data: {
-            key: appID,
-            content:appSecret
+            appId,
+            appSecret
           method: "post",
           url: "/linkv_decrypt",
           baseURL: "https://linkv-rtc-web.linkv.fun/",
         });
-        console.log(result)
+        console.log(data)
       } catch (error) {
         console.log("getInfo error", error);
       }
@@ -45,17 +46,17 @@
 
 ```js
 /**
- *  userId    string  用户id
- *  imAppId   string  im appId
- *  rtcAppId  string  rtc appID
- *  appKey    string  im appKey
+ *  userId      string  用户id
+ *  imAppId     string  im appId
+ *  rtcAppId    string  rtc appID
+ *  imAppkey    string  im appKey
  *  [socketUrl] string  im 连接的 socketurl 
  *  [env]       string  SDK环境选择
  *  [appPackageName] string 包名
  *  token  im token  (你需要通过server to server方式获取IM的toke,然后传入)
 */
 
-  const lvcEngine = new LVCEngine({userId,imAppId,rtcAppId,appKey,socketUrl,env,appPackageName,type,token})
+  const lvcEngine = new LVCEngine({userId,imAppId,rtcAppId,appKey:imAppkey,socketUrl,env,appPackageName,type,token})
 ```
 ## 2.3 登录SDK
 
@@ -119,6 +120,7 @@ let lvcEngine.joinRoom(roomId,role);
  *  content 消息内容
  *  type 消息类型
 */
+
 let lvcEngine.liveroomManager.sendDIYMessage(
           roomId,
           content,
@@ -126,7 +128,7 @@ let lvcEngine.liveroomManager.sendDIYMessage(
         );
 ```
 
-并实现事件注册
+注册 IM 和音视频事件回调
 
 ```js
 cosnt  {liveroomManager} = lvcEngine
@@ -177,14 +179,18 @@ liveroomManager.on("message",(value)=>{
 在**登录房间成功的回调**里 `添加预览视图` 和 `推流`
 
 ```js
-// 添加预览视图
-lvcEngine.createStream(source).then(stream=>{
-    console.log(stream)
-}).catch(err=>{
-    console.log(err)
-})
-// 
-lvcEngine.startPublishingStream(streamId,mediastream)
+/**
+ * 添加预览视图
+ * source  具体souce描述 请查看 https://doc-zh.linkv.sg/web/chat/api#%E5%88%9B%E5%BB%BA%E6%B5%81
+ *  视频源类型通过  
+*/
+funtion async publishStream(streamId){
+    try{
+      const stream = await lvcEngine.createStream(source)lvcEngine.startPublishingStream(streamId,stream)
+    }catch(err){
+        console.log(err)
+    }
+}
 ```
 
 ## 3.3 拉取或者停止拉取房间中其他人的视频流
@@ -192,15 +198,22 @@ lvcEngine.startPublishingStream(streamId,mediastream)
 在 `stream-update` 这个回调中拉取或者停止拉取他人的视频流
 
 ```js
-// 拉取
+/**
+ * 拉取
+ * userId 拉取的用户 ID
+*/
 lvcEngine.startPlayingStream(userId).then(mediastream=>{
+    // 将 mediastream 绑定到 video 上进行播放
     console.log(mediastream)
 }).catch(err=>{
     cosnole.log(err)
 })
-// 停止拉取
+/**
+ * 停止拉取
+ * userId 拉取的用户 ID
+*/
 lvcEngine.stopPlayingStream(userId).then(()=>{
-
+    console.log('停止拉流成功')
 }).catch(err=>{
     cosnole.log(err)
 })
@@ -214,7 +227,7 @@ lvcEngine.logout()
 
 # 四 api 接口文档
 
-详细的 api 接口文档请点击[查看](https://doc-zh.linkv.sg/web/chat/api)
+详细的 api 接口文档请点击[查看](LVCEngine/api.md)
 
 
 
