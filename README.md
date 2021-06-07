@@ -21,12 +21,20 @@
 
 ## 2.1 获取 im 和 rtc appId 和 appkey(只有 im 使用) 
 ```js
+
+
+```
+
+## 2.2 初始化SDK
+
+```js
+
 /***
  * appId      通过开发者平台获取
  * appSecret  通过开发者平台获取
  * return data (为了安全起见,获取方式需要放到服务端)
  */
-   async getInfo() {
+ function async getInfo() {
       try {
         const data = await this.$http({
           data: {
@@ -37,24 +45,25 @@
           baseURL: "https://linkv-rtc-web.linkv.fun/",
         });
         console.log(data)
+        return data
       } catch (error) {
         console.log("getInfo error", error);
       }
     }
-```
-
-## 2.2 初始化SDK
-
-```js
-/**
+    /**
  *  userId      string  用户id
  *  imAppId     string  im appId
  *  rtcAppId    string  rtc appID
  *  imAppkey    string  im appKey
- *  token  im token  (你需要通过server to server方式获取IM的toke,然后传入)
+ *  token  im token  (需要通过server to server方式获取IM的token,然后传入)
 */
 
-  const lvcEngine = new LVCEngine({userId,imAppId,rtcAppId,appKey:imAppkey,token})
+const async init = ()=>{
+  let data  = await getInfo()
+  const {im,rtc} =data
+  const lvcEngine = new LVCEngine({userId,imAppId:im.app_id,rtcAppId:rtc.app_Id,appKey:im.app_key,token})
+ }
+ 
 ```
 ## 2.3 登录SDK
 
@@ -101,7 +110,7 @@ personalManager.sendEventMessage(userId,content,type).then(res=>{
 
 ```js
 /**
- *  roomId 用户id
+ *  roomId 房间id
  *  role  1 主播 2 非主播
 */
 
@@ -112,7 +121,7 @@ let lvcEngine.joinRoom(roomId,role);
 
 ```js
 /**
- *  roomId 用户id
+ *  roomId 房间id
  *  content 消息内容
  *  type 消息类型
 */
@@ -173,8 +182,7 @@ liveroomManager.on("message",(value)=>{
 ```js
 /**
  * 添加预览视图
- * source  具体souce描述 请查看 https://doc-zh.linkv.sg/web/chat/api#%E5%88%9B%E5%BB%BA%E6%B5%81
- *  视频源类型通过  
+ * source  source 描述请查看 https://doc-zh.linkv.sg/web/chat/api#%E5%88%9B%E5%BB%BA%E6%B5%81
 */
 funtion async publishStream(streamId){
     try{

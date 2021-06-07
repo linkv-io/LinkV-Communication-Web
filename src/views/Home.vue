@@ -72,7 +72,7 @@ import config from "../config";
 import { getSelfUserId } from "../utils/util";
 import Settings from "@/components/settings.vue";
 import Nav from "@/components/navigate.vue";
-let { environment, imAppId, rtcAppId, appKey, token } = config;
+let { imAppId, rtcAppId, appKey } = config;
 // let { environment, token } = config;
 
 let selfUserId = String(getSelfUserId());
@@ -81,7 +81,6 @@ export default {
   data() {
     return {
       lvcEngine: null,
-      im: null,
       isCall: true,
       userId: "",
       // rtcUserId: "",
@@ -100,10 +99,7 @@ export default {
       isLogin: false,
     };
   },
-  created() {
-    this.getToken();
-    this.getInfo();
-  },
+  created() {},
   components: {
     Nav,
     Settings,
@@ -115,9 +111,9 @@ export default {
       background: "rgba(255, 255, 255, 0.3)",
     });
     this.init();
-    this.login();
   },
   methods: {
+    // 获取 info
     async getInfo() {
       try {
         const result = await this.$http({
@@ -130,24 +126,25 @@ export default {
           url: "/linkv_decrypt",
           baseURL: "https://linkv-rtc-web.linkv.fun/",
         });
+        console.log(2222);
         this.info = result;
       } catch (error) {
         console.log("getInfo error", error);
       }
     },
-
+    // 获取 token
     async getToken() {
       try {
-        await this.$http({
+        const data = await this.$http({
           headers: {
-            appid: "9K0YmleBXINt8BG92obtow==",
-            appKey: "7VVuST4bp1dNe8MxZgFciw==",
             userid: this.selfUserId,
           },
           method: "post",
-          url: "/api/rest/getWebimToken",
-          baseURL: "http://10.61.153.44:20071/",
+          url: "/api/rest/getWebimTestToken",
+          baseURL: "https://catchu-im-api.fusionv.com/",
         });
+        console.log(data);
+        this.token = data.data.data;
       } catch (error) {
         console.log(error);
         this.$message.error("获取 token 失败");
@@ -157,17 +154,24 @@ export default {
       this.$store.commit("updateEnv", res.env);
       this.$store.commit("setResultSettingConfig", res);
     },
-    init() {
+    async init() {
+      await this.getInfo();
+      await this.getToken();
+      // const { im, rtc } = this.info.data;
+      console.log(this.token);
+      console.log(imAppId);
+      console.log(rtcAppId);
+      console.log(appKey);
       this.lvcEngine = new window.LVCEngine({
         imAppId,
         rtcAppId,
         appKey,
-        environment,
         userId: this.selfUserId,
         // socketUrl: "wss://webimv2.fusionv.com/",
         socketUrl: "ws://10.61.153.49:10002",
-        token,
+        token: this.token,
       });
+      this.login();
     },
     async login() {
       try {
