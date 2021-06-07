@@ -146,7 +146,7 @@ export default {
           },
           method: "post",
           url: "/api/rest/getWebimToken",
-          baseURL: "https://catchu-im-api.fusionv.com/",
+          baseURL: "http://10.61.153.44:20071/",
         });
       } catch (error) {
         console.log(error);

@@ -18,7 +18,7 @@
 * Web 站点必须为 localhost 或 https
 
 
-## 2.1 获取 im 和 rtc appId 和 appkey 
+## 2.1 获取 im 和 rtc appId 和 appkey(只有 im 使用) 
 ```js
 /***
  * appId  通过开发
@@ -41,7 +41,6 @@
     }
 ```
 
-
 ## 2.2 初始化SDK
 
 ```js
@@ -53,7 +52,7 @@
  *  [socketUrl] string  im 连接的 socketurl 
  *  [env]       string  SDK环境选择
  *  [appPackageName] string 包名
- *  token 
+ *  token  im token  (你需要通过server to server方式获取IM的toke,然后传入)
 */
 
   const lvcEngine = new LVCEngine({userId,imAppId,rtcAppId,appKey,socketUrl,env,appPackageName,type,token})
@@ -105,8 +104,8 @@ personalManager.sendEventMessage(userId,content,type).then(res=>{
 /**
  *  roomId 用户id
  *  role  1 2 角色
- *  [auth]  鉴权签名值
- *  [expire] 过期时间戳
+ *  auth  鉴权签名值
+ *  expire 过期时间戳
 */
 
 let lvcEngine.joinRoom(roomId,role);
@@ -135,7 +134,7 @@ cosnt  {liveroomManager} = lvcEngine
  * 网络断开连接
  * 
 */
- lvcEngine.on("disconnect", async (err) => {
+ lvcEngine.on("disconnect",(err) => {
         console.log("disconnect", err);
       });
 /**
