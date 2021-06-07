@@ -80,7 +80,7 @@ export default {
   name: "Home",
   data() {
     return {
-      rim: null,
+      lvcEngine: null,
       im: null,
       isCall: true,
       userId: "",
@@ -102,6 +102,7 @@ export default {
   },
   created() {
     this.getToken();
+    this.getInfo();
   },
   components: {
     Nav,
@@ -117,24 +118,39 @@ export default {
     this.login();
   },
   methods: {
+    async getInfo() {
+      try {
+        const result = await this.$http({
+          data: {
+            key: "YpqpJT2NG9zIrkI1N9SiAgXuA2xd8RMj",
+            content:
+              "3AA052D3C91F66A94AE5FC4BDBE39A398274C5AF2410F5C3DB86E0FBA61DBF915915297CDCB1392B29DCE8A81987F9B8EBA6E877E3551BDF36691E627F132EA95BF998E3E616E2177A1F6C2B28FB6BE8E7071C2F5701F59DFA9EB2F0866C6FFF1FD46F26311D396AFC302B89B6B6E5ABB433E9112B2B902786936AEF8A8B5DA2DEC5906BF9CA6655908CDC26829C1A6FFEA46150EAA763CB63519343A01BDD7A71CA537154662AC88FDB19A0BE70C2629A6CEA4FFFD93D77D8434C098D8F4AB89D879686F00D8EC8EA1E033C3EBFB7E4259F37351965142F58DA1506B1230C4F3F50EC2D9E66A06D361F5A767804F35E6DF3D086E078CB7348A5F267552BA4473182F79BC072C92A84950259C86BD699FC6E86999816641446D516AF983D2670A3AF75ECFC1F743B720605A412021133E5CCE3DC5FE44959C60A7656029F51774CD177A46C2974F388741A948AE99780652CD3D58017F132A2C37ACB38CDFEA5543C961A0A6DF7D16C6745D3062AC0E0FBEA8470CBC9E137A8400B7D23A0C2737A32D14634223C2C7CFE4867752DDB346C271C23D82E92264AFA33B7170EFA0DC1648942F7A8937C3B0AF9BACAD9BB16",
+          },
+          method: "post",
+          url: "/linkv_decrypt",
+          baseURL: "https://linkv-rtc-web.linkv.fun/",
+        });
+        this.info = result;
+      } catch (error) {
+        console.log("getInfo error", error);
+      }
+    },
+
     async getToken() {
       try {
-        // eslint-disable-next-line no-unused-vars
-        const result = await fetch(
-          `https://catchu-im-api.fusionv.com/api/rest/getWebimToken`,
-          {
-            Headers: JSON.stringify({
-              appid: "9K0YmleBXINt8BG92obtow==",
-              appKey: "7VVuST4bp1dNe8MxZgFciw==",
-              userid: this.userId,
-            }),
-            method: "POST",
-          }
-        );
-        console.log(result);
+        await this.$http({
+          headers: {
+            appid: "9K0YmleBXINt8BG92obtow==",
+            appKey: "7VVuST4bp1dNe8MxZgFciw==",
+            userid: this.selfUserId,
+          },
+          method: "post",
+          url: "/api/rest/getWebimToken",
+          baseURL: "https://catchu-im-api.fusionv.com/",
+        });
       } catch (error) {
-        console.log("+++tokenerrr+++", error);
-        this.$message.error("get token error");
+        console.log(error);
+        this.$message.error("获取 token 失败");
       }
     },
     getSettings(res) {
@@ -142,26 +158,26 @@ export default {
       this.$store.commit("setResultSettingConfig", res);
     },
     init() {
-      this.rim = new window.RIM({
+      this.lvcEngine = new window.LVCEngine({
         imAppId,
         rtcAppId,
         appKey,
         environment,
         userId: this.selfUserId,
         // socketUrl: "wss://webimv2.fusionv.com/",
-        socketUrl: "10.61.153.49:10002",
+        socketUrl: "ws://10.61.153.49:10002",
         token,
       });
     },
     async login() {
       try {
-        await this.rim.login();
+        await this.lvcEngine.login();
         this.$message.success("登录成功");
         this.isLoading.close();
         this.isLogin = true;
-        const { _personalManager, _liveroomManager } = this.rim;
-        this.personalManager = _personalManager;
-        this.liveroomManager = _liveroomManager;
+        const { personalManager, liveroomManager } = this.lvcEngine;
+        this.personalManager = personalManager;
+        this.liveroomManager = liveroomManager;
         this.onEvent();
       } catch (error) {
         this.isLoading.close();
@@ -179,7 +195,7 @@ export default {
         this.roomId = this.userId;
       }
       try {
-        let streamListTemp = await this.rim.joinRoom(
+        let streamListTemp = await this.lvcEngine.joinRoom(
           this.roomId,
           creatRoom ? 1 : 2,
           "",
@@ -191,13 +207,13 @@ export default {
           await this.sendEventMessage(content, type);
         }
         this.$refs.audio.pause();
-        this.goMeet(creatRoom, streamListTemp, self.rim);
+        this.goMeet(creatRoom, streamListTemp, self.lvcEngine);
       } catch (error) {
         console.log(error);
         this.$message.error("加入房间失败");
       }
     },
-    goMeet(value, streamListTemp, rim) {
+    goMeet(value, streamListTemp, lvcEngine) {
       this.$router.push({
         name: "Meet",
         params: {
@@ -205,7 +221,7 @@ export default {
           roomId: value ? this.selfUserId : this.userId,
           userId: this.selfUserId,
           streamListTemp,
-          rim,
+          lvcEngine,
         },
       });
     },

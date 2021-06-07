@@ -102,7 +102,7 @@
     />
     <Live
       v-if="isShowLive"
-      :rim="rim"
+      :rim="lvcEngine"
       :roomId="roomId"
       :userId="userId"
       :list="list"
@@ -132,7 +132,7 @@ export default {
   data() {
     return {
       list: [],
-      rim: null,
+      lvcEngine: null,
       isShowLive: false,
       userId: "",
       source: 0,
@@ -209,9 +209,10 @@ export default {
         this.$router.push({ name: "Home" });
         return;
       } else {
-        const { roomId, userId, streamListTemp, rim, source } = routerParams;
-        this.rim = rim;
-        this.octopusRTC = this.rim._octopusRTC;
+        const { roomId, userId, streamListTemp, lvcEngine, source } =
+          routerParams;
+        this.lvcEngine = lvcEngine;
+        this.octopusRTC = this.lvcEngine._octopusRTC;
         this.roomId = roomId;
         this.userId = userId;
         this.source = source; // 1为推流 2为拉流
@@ -332,25 +333,25 @@ export default {
       this.publishStream(this.previewResult);
     },
     palyStream(userId) {
-      return this.rim.startPlayingStream(userId);
+      return this.lvcEngine.startPlayingStream(userId);
     },
     publishStream(stream) {
-      this.rim.startPublishingStream(this.userId, stream);
+      this.lvcEngine.startPublishingStream(this.userId, stream);
     },
     stopPublishStream() {
       for (let item of this.streamList) {
         if (item.userId == this.userId) {
-          this.rim.destroyStream(item.stream);
+          this.lvcEngine.destroyStream(item.stream);
         }
       }
-      this.rim.stopPublishingStream(this.userId);
+      this.lvcEngine.stopPublishingStream(this.userId);
       clearInterval(this.publishStatsTimer[this.userId]);
     },
     async startPreview(params) {
-      return await this.rim.createStream(params);
+      return await this.lvcEngine.createStream(params);
     },
     onEvent() {
-      const { liveroomManager } = this.rim;
+      const { liveroomManager } = this.lvcEngine;
       const list = this.list;
       // 直播间消息
       liveroomManager.on("message", (value) => {
@@ -463,32 +464,9 @@ export default {
             this.isShowRightList = true;
           }
         } else if (type == 0) {
-               setTimeout(() => {
-                  this.close();
-                }, 2000);
-          // this.streamList.forEach((value, key) => {
-          //   if (value.userId == streamList[0].userId) {
-          //     if (value.userId.indexOf("H") != -1) {
-          //       this.$toast({ content: this.$t("m.anchorleave") });
-          //       setTimeout(() => {
-          //         this.close();
-          //       }, 2000);
-          //     } else {
-          //       this.streamList.splice(key, 1);
-          //       this.rim.stopPlayingStream(value.userId);
-          //       this.$toast({
-          //         content: `${streamList[0].userId}${this.$t("m.leaveRoom")}`,
-          //       });
-          //       clearInterval(this.playStatsTimer[value.userId]);
-          //     }
-          //   }
-          // });
-          // if (this.streamList.length == 0) {
-          //   this.$toast({ content: this.$t("m.nobody") });
-          //   setTimeout(() => {
-          //     this.close();
-          //   }, 2000);
-          // }
+          setTimeout(() => {
+            this.close();
+          }, 2000);
         }
       });
     },
@@ -561,7 +539,7 @@ export default {
       console.log("click mute:::");
       if (this.isActiveMute) {
         this.isActiveMute = false;
-        this.rim.muteSwitch(this.userId, false);
+        this.lvcEngine.muteSwitch(this.userId, false);
         this.$toast({ content: "已取消静音" });
       } else {
         this.isActiveMute = true;
@@ -569,7 +547,7 @@ export default {
         this.$toast({ content: "已静音" });
       }
       let type = "linkv_enable_mic";
-      await this.rim.liveroomManager.sendDIYMessage(
+      await this.lvcEngine.liveroomManager.sendDIYMessage(
         this.roomId,
         this.isActiveMute ? "1" : "0",
         type
@@ -596,12 +574,20 @@ export default {
       let type = "linkv_enable_video";
       if (this.isActiveCamera) {
         this.isActiveCamera = false;
-        this.rim.cameraSwitch(this.userId, "open");
-        await this.rim.liveroomManager.sendDIYMessage(this.roomId, "1", type);
+        this.lvcEngine.cameraSwitch(this.userId, "open");
+        await this.lvcEngine.liveroomManager.sendDIYMessage(
+          this.roomId,
+          "1",
+          type
+        );
       } else {
         this.isActiveCamera = true;
-        this.rim.cameraSwitch(this.userId, "close");
-        await this.rim.liveroomManager.sendDIYMessage(this.roomId, "0", type);
+        this.lvcEngine.cameraSwitch(this.userId, "close");
+        await this.lvcEngine.liveroomManager.sendDIYMessage(
+          this.roomId,
+          "0",
+          type
+        );
       }
     },
     set() {
@@ -693,11 +679,11 @@ export default {
         if (value.userId == this.userId) {
           this.stopPublishStream();
         } else {
-          this.rim.stopPlayingStream(value.streamId);
+          this.lvcEngine.stopPlayingStream(value.streamId);
           clearInterval(this.playStatsTimer[value.streamId]);
         }
       });
-      this.rim.logout();
+      this.lvcEngine.logout();
       this.$router.push({ name: "Home" });
     },
   },
