@@ -148,13 +148,14 @@ export default {
         appKey,
         environment,
         userId: this.selfUserId,
-        socketUrl: "wss://webimv2.fusionv.com/",
-        // socketUrl: "10.61.153.49:10002",
+        // socketUrl: "wss://webimv2.fusionv.com/",
+        socketUrl: "10.61.153.49:10002",
+        token,
       });
     },
     async login() {
       try {
-        await this.rim.login(this.selfUserId, token);
+        await this.rim.login();
         this.$message.success("登录成功");
         this.isLoading.close();
         this.isLogin = true;
@@ -179,10 +180,8 @@ export default {
       }
       try {
         let streamListTemp = await this.rim.joinRoom(
-          this.selfUserId,
           this.roomId,
           creatRoom ? 1 : 2,
-          token,
           "",
           ""
         );

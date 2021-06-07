@@ -214,7 +214,7 @@ export default {
         this.octopusRTC = this.rim._octopusRTC;
         this.roomId = roomId;
         this.userId = userId;
-        this.source = source; // 1为推流 2为拉流 3为水晶球展示
+        this.source = source; // 1为推流 2为拉流
         let env = "prod";
         this.handleCallbackFun();
         this.onEvent();
