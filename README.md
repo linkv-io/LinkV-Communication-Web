@@ -1,4 +1,5 @@
 # LinkV-Communication
+* 商务合作与技术交流请加QQ群：1160896626，邮箱：develop@linkv.sg
 
 此SDK主要是对 LinkV [音视频SDK](https://doc-zh.linkv.sg/web/rtc/api)和 [IM SDK](https://doc-zh.linkv.sg/web/im/api)的一层封装，使其接口更加简单易用。所有封装的代码都在 `LVCEngine` 文件夹下，您可以参考此文档或者 [demo](https://linkv-rtc-web.linkv.fun/) 来实现功能。当然您也可以在项目中直接引用LinkV [音视频SDK](https://doc-zh.linkv.sg/web/rtc/api)和[IM SDK](https://doc-zh.linkv.sg/web/im/api)相关的类来实现更加复杂的功能。
 
@@ -50,13 +51,10 @@
  *  imAppId     string  im appId
  *  rtcAppId    string  rtc appID
  *  imAppkey    string  im appKey
- *  [socketUrl] string  im 连接的 socketurl 
- *  [env]       string  SDK环境选择
- *  [appPackageName] string 包名
  *  token  im token  (你需要通过server to server方式获取IM的toke,然后传入)
 */
 
-  const lvcEngine = new LVCEngine({userId,imAppId,rtcAppId,appKey:imAppkey,socketUrl,env,appPackageName,type,token})
+  const lvcEngine = new LVCEngine({userId,imAppId,rtcAppId,appKey:imAppkey,token})
 ```
 ## 2.3 登录SDK
 
@@ -105,8 +103,6 @@ personalManager.sendEventMessage(userId,content,type).then(res=>{
 /**
  *  roomId 用户id
  *  role  1 2 角色
- *  auth  鉴权签名值
- *  expire 过期时间戳
 */
 
 let lvcEngine.joinRoom(roomId,role);
