@@ -202,9 +202,9 @@ export default {
           ""
         );
         if (creatRoom) {
-          let content = { isAudio: false, extra: "", accept: true };
-          let type = "linkv_anwser_call";
-          await this.sendEventMessage(content, type);
+          // let content = { isAudio: false, extra: "", accept: true };
+          // let type = "linkv_anwser_call";
+          // await this.sendEventMessage(content, type);
         }
         this.$refs.audio.pause();
         this.goMeet(creatRoom, streamListTemp, self.lvcEngine);
@@ -324,7 +324,7 @@ export default {
       if (accept) {
         setTimeout(() => {
           self.joinRoom({ createRoom: false });
-        }, 5000);
+        });
       } else {
         this.$refs.audio.pause();
         this.dialogVisible = false;
