@@ -83,10 +83,10 @@ lvcEngine
 > 建议在初始化**sdk**时注册 IM 事件，如不注册，私信消息和房间消息都将无法收到。
 
 ```js
-const  { personalManager} = lvcEngine
-    personalManager.on("message",(value)=>{
-      console.log(value)
-    })
+const { personalManager} = lvcEngine
+  personalManager.on("message",(value)=>{
+    console.log(value)
+  })
 ```
 
 ## 2.4 发送私信事件消息
@@ -150,9 +150,9 @@ lvcEngine.on("disconnect", (err) => {
  * code  0 人员离开 1人员加入 
  * streamList 
 */
- lvcEngine.on("stream-update",({code,streamList})=>{
-   console.log('===stream-update====',code,streamList)
- })      
+lvcEngine.on("stream-update",({code,streamList})=>{
+  console.log('===stream-update====',code,streamList)
+})      
 /**
  * 拉流状态变更
  * code 0 拉流失败 1 拉流成功
@@ -160,7 +160,7 @@ lvcEngine.on("disconnect", (err) => {
  * state 状态  NO_PLAY PLAYING
 */
 lvcEngine.on("play-state-update", ({code,streamId,state})=>{
-   console.log('===play-state-update====',code,streamList,state)
+  console.log('===play-state-update====',code,streamList,state)
 
 })
 /**
@@ -177,7 +177,7 @@ lvcEngine.on("publish-state-update", ({code,streamId,state})=>{
  * 
 */
 liveroomManager.on("message",(value)=>{
-    console.log(value)
+  console.log(value)
 })
 
 ```
@@ -192,11 +192,11 @@ liveroomManager.on("message",(value)=>{
  * source  source 描述请查看 https://doc-zh.linkv.sg/web/chat/api#%E5%88%9B%E5%BB%BA%E6%B5%81
 */
 funtion async publishStream(streamId){
-    try{
-      const stream = await lvcEngine.createStream(source)lvcEngine.startPublishingStream(streamId,stream)
-    }catch(err){
-        console.log(err)
-    }
+  try{
+    const stream = await lvcEngine.createStream(source)lvcEngine.startPublishingStream(streamId,stream)
+  }catch(err){
+      console.log(err)
+  }
 }
 ```
 
@@ -210,8 +210,8 @@ funtion async publishStream(streamId){
  * userId 拉取的用户 ID
 */
 lvcEngine.startPlayingStream(userId).then(mediastream=>{
-    // 将 mediastream 绑定到 video 上进行播放
-    console.log(mediastream)
+  // 将 mediastream 绑定到 video 上进行播放
+  console.log(mediastream)
 }).catch(err=>{
     cosnole.log(err)
 })
@@ -220,9 +220,9 @@ lvcEngine.startPlayingStream(userId).then(mediastream=>{
  * userId 拉取的用户 ID
 */
 lvcEngine.stopPlayingStream(userId).then(()=>{
-    console.log('停止拉流成功')
+  console.log('停止拉流成功')
 }).catch(err=>{
-    cosnole.log(err)
+  cosnole.log(err)
 })
 ```
 
