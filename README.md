@@ -28,22 +28,23 @@
  * appSecret  通过开发者平台获取
  * return data (为了安全起见,获取方式需要放到服务端)
  */
- function async getInfo() {
-      try {
-        const data = await this.$http({
-          data: {
-            appId,
-            appSecret
-          method: "post",
-          url: "/linkv_decrypt",
-          baseURL: "https://linkv-rtc-web.linkv.fun/",
-        });
-        console.log(data)
-        return data
-      } catch (error) {
-        console.log("getInfo error", error);
-      }
+  const getInfo = async () => {
+    try {
+      const data = await this.$http({
+        data: {
+          appId,
+          appSecret,
+        },
+        method: "post",
+        url: "/linkv_decrypt",
+        baseURL: "https://linkv-rtc-web.linkv.fun/",
+      });
+      console.log(data);
+      return data;
+    } catch (error) {
+      console.log("getInfo error", error);
     }
+  };
     /**
  *  userId      string  用户id
  *  imAppId     string  im appId
@@ -52,21 +53,29 @@
  *  token  im token  (需要通过server to server方式获取IM的token,然后传入)
 */
 
-const async init = ()=>{
-  let data  = await getInfo()
-  const {im,rtc} =data
-  const lvcEngine = new LVCEngine({userId,imAppId:im.app_id,rtcAppId:rtc.app_Id,appKey:im.app_key,token})
- }
- 
+const init = async () => {
+  let data = await getInfo();
+  const { im, rtc } = data;
+  const lvcEngine = new LVCEngine({
+    userId,
+    imAppId: im.app_id,
+    rtcAppId: rtc.app_Id,
+    appKey: im.app_key,
+    token,
+  });
+};
 ```
 ## 2.2 登录SDK
 
 ```js
-lvcEngine.login().then((res)=>{
-    console.log(res)
-}).catch((err)=>{
-    console.log(err)
-})
+lvcEngine
+  .login()
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 ```
 
 ## 2.3 设置IM私信事件监听
@@ -91,11 +100,14 @@ const  { personalManager} = lvcEngine
  *  type     string 消息类型
 */
 
-personalManager.sendEventMessage(userId,content,type).then(res=>{
-    console.log(res)
-}).catch(err=>{
-    console.log(err)
-})
+personalManager
+  .sendEventMessage(userId, content, type)
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 ```
 
 # 三、使用LVCEngine实现直播间功能
@@ -108,7 +120,7 @@ personalManager.sendEventMessage(userId,content,type).then(res=>{
  *  role  1 主播 2 非主播
 */
 
-let lvcEngine.joinRoom(roomId,role);
+lvcEngine.joinRoom(roomId,role);
 ```
 
 ## 3.2 发送直播间消息
@@ -119,27 +131,27 @@ let lvcEngine.joinRoom(roomId,role);
  *  content 消息内容
  *  type 消息类型
 */
-
-let lvcEngine.liveroomManager.sendDIYMessage(roomId,content,type);
+ lvcEngine.liveroomManager.sendDIYMessage(roomId,content,type);
 ```
 
 注册 IM 和音视频事件回调
 
 ```js
-cosnt  {liveroomManager} = lvcEngine
+const  {liveroomManager} = lvcEngine
 /**
  * 网络断开连接
  * 
 */
- lvcEngine.on("disconnect",(err) => {
-        console.log("disconnect", err);
-      });
+lvcEngine.on("disconnect", (err) => {
+  console.log("disconnect", err);
+});
 /**
  * 房间人员变更
  * code  0 人员离开 1人员加入 
  * streamList 
 */
  lvcEngine.on("stream-update",({code,streamList})=>{
+   console.log('===stream-update====',code,streamList)
  })      
 /**
  * 拉流状态变更
@@ -148,6 +160,7 @@ cosnt  {liveroomManager} = lvcEngine
  * state 状态  NO_PLAY PLAYING
 */
 lvcEngine.on("play-state-update", ({code,streamId,state})=>{
+   console.log('===play-state-update====',code,streamList,state)
 
 })
 /**
@@ -156,7 +169,7 @@ lvcEngine.on("play-state-update", ({code,streamId,state})=>{
  * state 状态 NO_PUBLISH PUBLISHING
 */
 lvcEngine.on("publish-state-update", ({code,streamId,state})=>{
-
+  console.log("===publish-state-update===",code,streamId,state)
 })
 
 /**
