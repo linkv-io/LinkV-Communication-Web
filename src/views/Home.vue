@@ -73,8 +73,6 @@ import { getSelfUserId } from "../utils/util";
 import Settings from "@/components/settings.vue";
 import Nav from "@/components/navigate.vue";
 let { imAppId, rtcAppId, appKey } = config;
-// let { environment, token } = config;
-
 let selfUserId = String(getSelfUserId());
 export default {
   name: "Home",

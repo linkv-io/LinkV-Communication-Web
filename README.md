@@ -118,9 +118,15 @@ personalManager
 /**
  *  roomId 房间id
  *  role  1 主播 2 非主播
+ * streamList 房间的用户
 */
-
-lvcEngine.joinRoom(roomId,role);
+const joinRoom = async ()=>{
+  try{
+    const streamList = await lvcEngine.joinRoom(roomId,role);
+  }catch(err){
+    console.log(err)
+  }
+}
 ```
 
 ## 3.2 发送直播间消息
