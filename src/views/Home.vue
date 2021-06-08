@@ -126,7 +126,6 @@ export default {
           url: "/linkv_decrypt",
           baseURL: "https://linkv-rtc-web.linkv.fun/",
         });
-        console.log(2222);
         this.info = result;
       } catch (error) {
         console.log("getInfo error", error);
@@ -188,12 +187,7 @@ export default {
     // 加入 im直播间
     async joinRoom(value) {
       const { creatRoom } = value;
-      const self = this;
-      if (creatRoom) {
-        this.roomId = this.selfUserId;
-      } else {
-        this.roomId = this.userId;
-      }
+      creatRoom ? (this.roomId = this.selfUserId) : (this.roomId = this.userId);
       try {
         let streamListTemp = await this.lvcEngine.joinRoom(
           this.roomId,
@@ -201,13 +195,8 @@ export default {
           "",
           ""
         );
-        if (creatRoom) {
-          // let content = { isAudio: false, extra: "", accept: true };
-          // let type = "linkv_anwser_call";
-          // await this.sendEventMessage(content, type);
-        }
         this.$refs.audio.pause();
-        this.goMeet(creatRoom, streamListTemp, self.lvcEngine);
+        this.goMeet(creatRoom, streamListTemp, this.lvcEngine);
       } catch (error) {
         console.log(error);
         this.$message.error("加入房间失败");

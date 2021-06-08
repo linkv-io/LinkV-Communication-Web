@@ -12,7 +12,7 @@
 			<span class="">{{$t('m.userID')}}: {{navUserId}}</span>
 		</div>
 		<div class="text" v-else>
-			{{$t('m.cooperation')}}：cloud@liveme.com
+			{{$t('m.cooperation')}}：develop@linkv.sg
 		</div>
 	</div>
 </template>
