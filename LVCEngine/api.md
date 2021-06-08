@@ -1,6 +1,6 @@
 ---
-title:  RIM JS SDK API 文档
-description: RIM JS SDK API 文档
+title:  LVCEngine JS SDK API 文档
+description: LVCEngine JS SDK API 文档
 menu: API 文档
 position: 3
 group_menu: API文档
@@ -10,11 +10,11 @@ category: chat
 
 **更新时间：2020-06-03**
 
-## RIM
+## LVCEngine
 
-### 创建RIM实例
+### 创建LVCEngine实例
 
-new RIM(userId, imAppId, rtcAppId, appKey, socketUrl, env, appPackageName, type)
+new LVCEngine(userId, imAppId, rtcAppId, appKey, socketUrl, env, appPackageName, type)
 
 
 | Param | Type | Default | Description |
@@ -31,9 +31,9 @@ new RIM(userId, imAppId, rtcAppId, appKey, socketUrl, env, appPackageName, type)
 
 ### 登录房间
 
-RIM.joinRoom(userId, roomId, role, token, auth, expire) ⇒ <code>Array</code> &#124; <code>errMsg</code>
+LVCEngine.joinRoom(userId, roomId, role, token, auth, expire) ⇒ <code>Array</code> &#124; <code>errMsg</code>
 
-**Kind**: instance method of <code>[RIM](#RIM)</code>  
+**Kind**: instance method of <code>[LVCEngine](#LVCEngine)</code>  
 **Returns**: <code>Array</code> &#124; <code>errMsg</code> - {(Promise<streamList[] | errMsg>)}  
 
 | Param | Type | Description |
@@ -47,18 +47,18 @@ RIM.joinRoom(userId, roomId, role, token, auth, expire) ⇒ <code>Array</code> &
 
 ### 登出房间
 
-RIM.logout() ⇒ <code>void</code>
+LVCEngine.logout() ⇒ <code>void</code>
 
-**Kind**: instance method of <code>[RIM](#RIM)</code>  
+**Kind**: instance method of <code>[LVCEngine](#LVCEngine)</code>  
 **Returns**: <code>void</code>
 
 ## RTC部分
 
 ### 创建流
 
-RIM.createStream([source]) ⇒ <code>mediastream</code>
+LVCEngine.createStream([source]) ⇒ <code>mediastream</code>
 
-**Kind**: instance method of <code>[RIM](#RIM)</code>  
+**Kind**: instance method of <code>[LVCEngine](#LVCEngine)</code>  
 **Returns**: <code>mediastream</code> - {Promise<MediaStream>}  
 
 | Param | Type | Description |
@@ -89,18 +89,18 @@ RIM.createStream([source]) ⇒ <code>mediastream</code>
 | [source.custom.bitrate] | <code>number</code> | 码率 |
 
 ### 删除流
-RIM.destroyStream(mediastream)
+LVCEngine.destroyStream(mediastream)
 
-**Kind**: instance method of <code>[RIM](#RIM)</code>  
+**Kind**: instance method of <code>[LVCEngine](#LVCEngine)</code>  
 
 | Param | Type |
 | --- | --- |
 | mediastream | <code>MediaStream</code> | 
 
 ### 开始推流
-RIM.startPublishingStream(streamId, mediaElement) ⇒ <code>void</code>
+LVCEngine.startPublishingStream(streamId, mediaElement) ⇒ <code>void</code>
 
-**Kind**: instance method of <code>[RIM](#RIM)</code>  
+**Kind**: instance method of <code>[LVCEngine](#LVCEngine)</code>  
 **Returns**: <code>void</code> - {Promise<void>}  
 
 | Param | Type | Description |
@@ -109,18 +109,18 @@ RIM.startPublishingStream(streamId, mediaElement) ⇒ <code>void</code>
 | mediaElement | <code>MediaStream</code> | 流 |
 
 ### 停止推流
-RIM.stopPublishingStream(streamId)
+LVCEngine.stopPublishingStream(streamId)
 
-**Kind**: instance method of <code>[RIM](#RIM)</code>  
+**Kind**: instance method of <code>[LVCEngine](#LVCEngine)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | streamId | <code>string</code> | 流id |
 
 ### 开始拉流
-RIM.startPlayingStream(streamId) ⇒ <code>void</code>
+LVCEngine.startPlayingStream(streamId) ⇒ <code>void</code>
 
-**Kind**: instance method of <code>[RIM](#RIM)</code>  
+**Kind**: instance method of <code>[LVCEngine](#LVCEngine)</code>  
 **Returns**: <code>void</code> - {(Promise<MediaStream | void>)}  
 
 | Param | Type | Description |
@@ -128,18 +128,18 @@ RIM.startPlayingStream(streamId) ⇒ <code>void</code>
 | streamId | <code>string</code> | 流id |
 
 ### 停止拉流
-RIM.stopPlayingStream(streamId)
+LVCEngine.stopPlayingStream(streamId)
 
-**Kind**: instance method of <code>[RIM](#RIM)</code>  
+**Kind**: instance method of <code>[LVCEngine](#LVCEngine)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | streamId | <code>string</code> | 流id |
 
 ### 开启静音
-RIM.muteSwitch(streamId, mute)
+LVCEngine.muteSwitch(streamId, mute)
 
-**Kind**: instance method of <code>[RIM](#RIM)</code>  
+**Kind**: instance method of <code>[LVCEngine](#LVCEngine)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -147,9 +147,9 @@ RIM.muteSwitch(streamId, mute)
 | mute | <code>boolean</code> | 是否静音 |
 
 ### 切换摄像头
-RIM.cameraSwitch(streamId, state)
+LVCEngine.cameraSwitch(streamId, state)
 
-**Kind**: instance method of <code>[RIM](#RIM)</code>  
+**Kind**: instance method of <code>[LVCEngine](#LVCEngine)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -159,31 +159,31 @@ RIM.cameraSwitch(streamId, state)
 ### 流变化通知 event 
 "stream-update" ⇒ <code>[stramUpdateResult](#stramUpdateResult)</code>
 
-**Kind**: event emitted by <code>[RIM](#RIM)</code>  
+**Kind**: event emitted by <code>[LVCEngine](#LVCEngine)</code>  
 **Since**: 2.0  
 
 ### websocket 断开通知 event.
 "disconnect" ⇒ <code>[errMsg](#errMsg)</code>
 
-**Kind**: event emitted by <code>[RIM](#RIM)</code>  
+**Kind**: event emitted by <code>[LVCEngine](#LVCEngine)</code>  
 **Since**: 2.0  
 
 ### 踢人通知 event.
 "kick-out" ⇒ <code>[kickResult](#kickResult)</code>
 
-**Kind**: event emitted by <code>[RIM](#RIM)</code>  
+**Kind**: event emitted by <code>[LVCEngine](#LVCEngine)</code>  
 **Since**: 2.0 
 
 ### 推流状态通知 event.
 "publish-state-update" ⇒ <code>[streamStateResult](#streamStateResult)</code>
 
-**Kind**: event emitted by <code>[RIM](#RIM)</code>  
+**Kind**: event emitted by <code>[LVCEngine](#LVCEngine)</code>  
 **Since**: 2.0 
 
 ### 拉流状态通知 event.
 "play-state-update" ⇒ <code>[streamStateResult](#streamStateResult)</code>
 
-**Kind**: event emitted by <code>[RIM](#RIM)</code>  
+**Kind**: event emitted by <code>[LVCEngine](#LVCEngine)</code>  
 **Since**: 2.0  
 
 ## 自定义类型
@@ -284,7 +284,7 @@ RIM.cameraSwitch(streamId, state)
 
 
 ## 直播间部分
-RIM.liveroomManager
+LVCEngine.liveroomManager
 **Kind**: global class    
 
 * [LiveroomManager](#LiveroomManager)
@@ -446,7 +446,7 @@ liveroomManager.sendMessage(roomId, content) ⇒ <code>void</code>
 <a name="PersonalManager"></a>
 
 ## 私信部分
-RIM.personalManager
+LVCEngine.personalManager
 **Kind**: global class   
 
 * [PersonalManager](#PersonalManager)
