@@ -113,56 +113,6 @@ export default {
     this.init();
   },
   methods: {
-    aaa() {
-      const getInfo = async () => {
-        try {
-          const data = await this.$http({
-            data: {
-              appId,
-              appSecret,
-            },
-            method: "post",
-            url: "/linkv_decrypt",
-            baseURL: "https://linkv-rtc-web.linkv.fun/",
-          });
-          console.log(data);
-          return data;
-        } catch (error) {
-          console.log("getInfo error", error);
-        }
-      };
-      const init = async () => {
-        let data = await getInfo();
-        const { im, rtc } = data;
-        const lvcEngine = new LVCEngine({
-          userId,
-          imAppId: im.app_id,
-          rtcAppId: rtc.app_Id,
-          appKey: im.app_key,
-          token,
-        });
-      };
-      lvcEngine
-        .login()
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
-      personalManager
-        .sendEventMessage(userId, content, type)
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-      lvcEngine.joinRoom(roomId, role);
-
-      lvcEngine.liveroomManager.sendDIYMessage(roomId, content, type);
-    },
     // 获取 info
     async getInfo() {
       try {

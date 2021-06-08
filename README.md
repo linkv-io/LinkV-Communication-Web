@@ -193,7 +193,8 @@ liveroomManager.on("message",(value)=>{
 */
 funtion async publishStream(streamId){
   try{
-    const stream = await lvcEngine.createStream(source)lvcEngine.startPublishingStream(streamId,stream)
+    const stream = await lvcEngine.createStream(source)
+    lvcEngine.startPublishingStream(streamId,stream)
   }catch(err){
       console.log(err)
   }
