@@ -45,7 +45,7 @@
       console.log("getInfo error", error);
     }
   };
-    /**
+/**
  *  userId      string  用户id
  *  imAppId     string  im appId
  *  rtcAppId    string  rtc appID
