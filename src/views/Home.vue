@@ -47,7 +47,7 @@
           </div>
         </div>
         <div class="dialog-content-icon">
-          <audio ref="audio" loop="loop">
+          <audio muted autoPlay="autoPlay" ref="audio" loop="loop" @click="audioClick" >
             <source src="../assets/voip_call.mp3" type="audio/mp3" />
           </audio>
           <div class="dialog-content-icon-receive" v-show="!isCall">
@@ -111,6 +111,9 @@ export default {
     this.init();
   },
   methods: {
+    audioClick() {
+      this.$refs.audio.play();
+    },
     // 获取 info
     async getInfo() {
       try {
@@ -237,7 +240,7 @@ export default {
           this.$message.error("暂时无人接听请稍后重试");
           self.hangUp();
           this.$refs.audio.pause();
-        }, 60 * 1000);
+        }, 30 * 1000);
         setTimeout(() => {
           self.$refs.audio.play();
         });
@@ -303,7 +306,7 @@ export default {
       this.dialogVisible = true;
       const self = this;
       setTimeout(() => {
-        self.$refs.audio.play();
+        self.$refs.audio.click();
       }, 500);
       this.userId = from;
     },

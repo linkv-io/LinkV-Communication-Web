@@ -247,11 +247,20 @@ export default {
       }
     },
     createVideoElement() {
-      this.streamList.push({
-        userId: this.userId,
-        streamId: this.userId,
-        roomId: this.roomId,
-      });
+      if (this.streamList.length == 0) {
+        this.streamList.push({
+          userId: this.userId,
+          streamId: this.userId,
+          roomId: this.roomId,
+        });
+      } else {
+        this.streamList.unshift({
+          userId: this.userId,
+          streamId: this.userId,
+          roomId: this.roomId,
+        });
+      }
+
       this.$nextTick(() => {
         this.creatPublishStream();
       });
