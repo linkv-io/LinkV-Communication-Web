@@ -1,7 +1,7 @@
 <template>
   <div id="live">
     <div class="right">
-      <div class="content">
+      <div class="content" ref="content">
         <div v-for="item in list" :key="item.key" class="content-item">
           <div class="content-item-user">{{ item.from }}</div>
           <div class="content-item-content">{{ item.content }}</div>
@@ -27,6 +27,14 @@ export default {
     };
   },
   props: ["rim", "roomId", "userId", "list"],
+  watch: {
+    list: function () {
+      console.log(this);
+      this.$nextTick(() => {
+        this.$refs.content.scrollTop = 10000;
+      });
+    },
+  },
   methods: {
     onEnterSendMessage() {
       this.onSend();
@@ -43,6 +51,9 @@ export default {
             }
             list.push({ from: self.userId, content: this.message });
             this.message = "";
+            this.$nextTick(() => {
+              this.$refs.content.scrollTop = 10000;
+            });
           },
           (err) => {
             this.$message.error("消息发送失败");
@@ -65,6 +76,7 @@ export default {
   .right {
     width: 446px;
     .content {
+      border: 1px dashed #dddddd;
       padding: 0px;
       background: rgba(0, 0, 0, 0.4);
       width: 100%;
@@ -111,6 +123,7 @@ export default {
         font-weight: 400;
         // color: #aeb0b8;
         line-height: 20px;
+        border: 1px dashed #dddddd;
       }
       div {
         background: rgba(0, 0, 0, 0.4);
@@ -127,6 +140,7 @@ export default {
         cursor: pointer;
         text-align: center;
         line-height: 60px;
+        border: 1px dashed #dddddd;
       }
     }
   }

@@ -356,6 +356,8 @@ export default {
           } else {
             this.$message.success("对方打开了摄像头");
           }
+        } else if (extend1 == "linkv_leave_room") {
+          console.log("收到leave_room");
         } else {
           this.isShowLive = true;
           const { extend1 } = $data;
@@ -488,6 +490,7 @@ export default {
           }
         } else if (type == 0) {
           setTimeout(() => {
+            this.$message.error("对方已挂断");
             this.close();
           }, 2000);
         }
@@ -727,6 +730,7 @@ export default {
   height: 100%;
   position: relative;
   .content {
+    text-align: center;
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.92);
@@ -741,6 +745,12 @@ export default {
       height: 175px;
       border: 1px dashed #dddddd;
       z-index: 1;
+    }
+    .content-item-content {
+      width: 80%;
+      word-wrap: break-word;
+      word-break: normal;
+      text-align: left;
     }
     .cover-video {
       width: 100%;

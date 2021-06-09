@@ -166,7 +166,7 @@ export default {
         socketUrl: "wss://webimv2.fusionv.com/",
         // socketUrl: "ws://10.61.153.49:10002",
         token: this.token,
-        timeout: 60 * 1000,
+        timeout:60 * 1000,
       });
       this.login();
     },
