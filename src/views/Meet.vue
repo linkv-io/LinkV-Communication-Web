@@ -333,13 +333,29 @@ export default {
       // 直播间消息
       liveroomManager.on("message", (value) => {
         console.log(value, "直播间消息");
-        this.isShowLive = true;
-        if (list.length > 10) {
-          list.shift();
-          console.log(list);
-          list.push(value);
+        const { $data } = value;
+        const { extend1, content } = $data;
+        if (extend1 == "linkv_enable_mic") {
+          if (content == 0) {
+            this.$message.success("对方关闭了声音");
+          } else {
+            this.$message.success("对方打开了声音");
+          }
+        } else if (extend1 == "linkv_enable_mic") {
+          if (content == 0) {
+            this.$message.success("对方关闭了摄像头");
+          } else {
+            this.$message.success("对方打开了摄像头");
+          }
         } else {
-          list.push(value);
+          this.isShowLive = true;
+          if (list.length > 9) {
+            list.shift();
+            console.log(list);
+            list.push($data);
+          } else {
+            list.push($data);
+          }
         }
       });
       // 用户加入
@@ -419,20 +435,19 @@ export default {
             this.$toast({ content: `${streamId}推流失败。` });
           } else if (type == 1) {
             if (this.source == 1) {
-              console.log("推流成功");
               let content = { isAudio: false, extra: "", accept: true };
               let type = "linkv_anwser_call";
               await this.sendEventMessage(content, type);
             }
           }
           this.publishStatsTimer[streamId] = setInterval(async () => {
-            const audioResult = await this.octopusRTC.getLocalAudioStats(
-              streamId
-            );
-            const videoResult = await this.octopusRTC.getLocalVideoStats(
-              streamId
-            );
-            console.log("publish stats result:::", audioResult, videoResult);
+            // const audioResult = await this.octopusRTC.getLocalAudioStats(
+            //   streamId
+            // );
+            // const videoResult = await this.octopusRTC.getLocalVideoStats(
+            //   streamId
+            // );
+            // console.log("publish stats result:::", audioResult, videoResult);
           }, 2000);
         }
       );
@@ -543,7 +558,7 @@ export default {
       let type = "linkv_enable_mic";
       await this.lvcEngine.liveroomManager.sendDIYMessage(
         this.roomId,
-        this.isActiveMute ? "1" : "0",
+        this.isActiveMute ? "0" : "1",
         type
       );
     },

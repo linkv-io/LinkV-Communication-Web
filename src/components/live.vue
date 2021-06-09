@@ -38,7 +38,7 @@ export default {
         this.rim.liveroomManager.sendMessage(this.roomId, this.message).then(
           () => {
             const list = this.list;
-            if (list.length > 10) {
+            if (list.length > 9) {
               list.shift();
             }
             list.push({ from: self.userId, content: this.message });

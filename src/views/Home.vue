@@ -160,9 +160,10 @@ export default {
         rtcAppId,
         appKey,
         userId: this.selfUserId,
-        // socketUrl: "wss://webimv2.fusionv.com/",
-        socketUrl: "ws://10.61.153.49:10002",
+        socketUrl: "wss://webimv2.fusionv.com/",
+        // socketUrl: "ws://10.61.153.49:10002",
         token: this.token,
+        timeout:60*1000
       });
       this.login();
     },
@@ -232,6 +233,10 @@ export default {
         const self = this;
         await this.sendEventMessage(content, type);
         this.dialogVisible = true;
+        this.callTimer = setTimeout(() => {
+          this.$message.error("暂时无人接听请稍后重试");
+          this.hangup();
+        }, 60 * 1000);
         setTimeout(() => {
           self.$refs.audio.play();
         });
@@ -305,7 +310,7 @@ export default {
       const { isAudio, accept } = content;
       this.isAudio = isAudio;
       this.accept = accept;
-      this.$message.success("接收到同意或拒绝呼叫");
+      clearTimeout(this.callTimer);
       // 如果是同意
       const self = this;
       if (accept) {
