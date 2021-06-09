@@ -163,7 +163,7 @@ export default {
         socketUrl: "wss://webimv2.fusionv.com/",
         // socketUrl: "ws://10.61.153.49:10002",
         token: this.token,
-        timeout:60*1000
+        timeout: 60 * 1000,
       });
       this.login();
     },
@@ -235,7 +235,8 @@ export default {
         this.dialogVisible = true;
         this.callTimer = setTimeout(() => {
           this.$message.error("暂时无人接听请稍后重试");
-          this.hangup();
+          self.hangUp();
+          this.$refs.audio.pause();
         }, 60 * 1000);
         setTimeout(() => {
           self.$refs.audio.play();

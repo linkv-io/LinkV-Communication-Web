@@ -93,13 +93,13 @@
       <!-- <li class="item set" @click="set" v-if="source != 3"></li> -->
       <li class="item close" @click="close"></li>
     </ul>
-    <Settings
+    <!-- <Settings
       v-bind:isShowSet.sync="isShowSet"
       v-bind:isSettingShowVideoDeviceOptions.sync="isSettingShowVideoDevice"
       v-bind:deviceConfigObj="deviceConfigObj"
       v-bind:source="'meet'"
       v-on:get-settings="getSettings"
-    />
+    /> -->
     <Live
       v-if="isShowLive"
       :rim="lvcEngine"
@@ -114,7 +114,7 @@
 import Nav from "@/components/navigate.vue";
 import Video from "@/components/video.vue";
 import Audio from "@/components/audio.vue";
-import Settings from "@/components/settings.vue";
+// import Settings from "@/components/settings.vue";
 import Live from "@/components/live.vue";
 import * as bowser from "bowser";
 import config from "@/config/octopus.config.js";
@@ -126,7 +126,7 @@ export default {
     Nav,
     Video,
     Audio,
-    Settings,
+    // Settings,
     Live,
   },
   data() {
@@ -341,7 +341,7 @@ export default {
           } else {
             this.$message.success("对方打开了声音");
           }
-        } else if (extend1 == "linkv_enable_mic") {
+        } else if (extend1 == "linkv_enable_video") {
           if (content == 0) {
             this.$message.success("对方关闭了摄像头");
           } else {
@@ -349,9 +349,14 @@ export default {
           }
         } else {
           this.isShowLive = true;
+          const { extend1 } = $data;
+          if (extend1 == "linkv_gift") {
+            $data.content = "收到一条礼物消息,请在手机查看";
+          }
           if (list.length > 9) {
             list.shift();
             console.log(list);
+
             list.push($data);
           } else {
             list.push($data);
