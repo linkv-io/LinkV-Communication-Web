@@ -1,5 +1,6 @@
 # LinkV-Communication
-* 商务合作与技术交流请加QQ群：1160896626，邮箱：develop@linkv.sg，[LinkV 微信](./snapshot/LinkV微信.jpeg)
+- 商务合作与技术交流请加QQ群：**1160896626**，邮箱：**[develop@linkv.sg](mailto:develop@linkv.sg)**， 微信：**[LinkV Business](./snapshot/LinkV微信.jpeg)**
+- 视频讲解：
 
 [![视频讲解](./snapshot/视频讲解1.png)](https://www.loom.com/share/811ea4d6536a4083bc51a386b976f9d6)
 
