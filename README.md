@@ -1,5 +1,9 @@
 # LinkV-Communication
-* 商务合作与技术交流请加QQ群：1160896626，邮箱：develop@linkv.sg
+- 商务合作与技术交流请加QQ群：**1160896626**，邮箱：**[develop@linkv.sg](mailto:develop@linkv.sg)**， 微信：**[LinkV Business](./snapshot/LinkV微信.jpeg)**
+
+视频讲解：
+
+[![视频讲解](./snapshot/视频讲解1.png)](https://www.loom.com/share/811ea4d6536a4083bc51a386b976f9d6)
 
 此SDK主要是对 LinkV [音视频SDK](https://doc-zh.linkv.sg/web/rtc/api)和 [IM SDK](https://doc-zh.linkv.sg/web/im/api)的一层封装，使其接口更加简单易用。所有封装的代码都在 `LVCEngine` 文件夹下，您可以参考此文档或者 [demo](https://linkv-rtc-web.linkv.fun/) 来实现功能。当然您也可以在项目中直接引用LinkV [音视频SDK](https://doc-zh.linkv.sg/web/rtc/api)和[IM SDK](https://doc-zh.linkv.sg/web/im/api)相关的类来实现更加复杂的功能。
 
