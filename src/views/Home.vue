@@ -79,8 +79,7 @@ import config from "../config";
 import Settings from "@/components/settings.vue";
 import Nav from "@/components/navigate.vue";
 let { imAppId, rtcAppId, appKey } = config;
-// let selfUserId = String(getSelfUserId());
-let selfUserId=1000;
+let selfUserId = String(getSelfUserId());
 export default {
   name: "Home",
   data() {
@@ -175,8 +174,8 @@ export default {
         rtcAppId,
         appKey,
         userId: this.selfUserId,
-        // socketUrl: "wss://webimv2.fusionv.com/",
-        socketUrl: "ws://10.61.153.49:10002",
+        socketUrl: "wss://webimv2.fusionv.com/",
+        // socketUrl: "ws://10.61.153.49:10002",
         token: this.token,
       });
       this.login();
