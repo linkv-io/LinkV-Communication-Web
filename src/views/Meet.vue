@@ -573,47 +573,23 @@ export default {
         this.$toast({ content: "已静音" });
       }
       let type = "linkv_enable_mic";
-      await this.lvcEngine.liveroomManager.sendDIYMessage(
+      this.lvcEngine.liveroomManager.sendRoomMessage(
         this.roomId,
         this.isActiveMute ? "0" : "1",
         type
       );
     },
-    // join() {
-    //   if (!this.isShowJoin) {
-    //     this.isShowJoin = true;
-    //     this.createVideoElement();
-    //   } else {
-    //     this.isShowJoin = false;
-    //     this.stopPublishStream();
-    //     this.streamList.splice(1, 1);
-    //     if (this.isActiveMute) {
-    //       this.isActiveMute = false;
-    //     }
-    //     if (this.isActiveCamera) {
-    //       this.isActiveCamera = false;
-    //     }
-    //   }
-    // },
     async record() {
       console.log("click record:::");
       let type = "linkv_enable_video";
       if (this.isActiveCamera) {
         this.isActiveCamera = false;
         this.lvcEngine.cameraSwitch(this.userId, "open");
-        await this.lvcEngine.liveroomManager.sendDIYMessage(
-          this.roomId,
-          "1",
-          type
-        );
+        this.lvcEngine.liveroomManager.sendRoomMessage(this.roomId, "1", type);
       } else {
         this.isActiveCamera = true;
         this.lvcEngine.cameraSwitch(this.userId, "close");
-        await this.lvcEngine.liveroomManager.sendDIYMessage(
-          this.roomId,
-          "0",
-          type
-        );
+        this.lvcEngine.liveroomManager.sendRoomMessage(this.roomId, "0", type);
       }
     },
     set() {

@@ -137,7 +137,7 @@ const joinRoom = async ()=>{
  *  content 消息内容
  *  type 消息类型
 */
- lvcEngine.liveroomManager.sendDIYMessage(roomId,content,type);
+ lvcEngine.liveroomManager.sendRoomMessage(roomId,content,type);
 ```
 
 注册 IM 和音视频事件回调

@@ -47,7 +47,13 @@
           </div>
         </div>
         <div class="dialog-content-icon">
-          <audio muted autoPlay="autoPlay" ref="audio" loop="loop" @click="audioClick" >
+          <audio
+            muted
+            autoPlay="autoPlay"
+            ref="audio"
+            loop="loop"
+            @click="audioClick"
+          >
             <source src="../assets/voip_call.mp3" type="audio/mp3" />
           </audio>
           <div class="dialog-content-icon-receive" v-show="!isCall">
@@ -69,11 +75,12 @@
 <script>
 // @ is an alias to /src
 import config from "../config";
-import { getSelfUserId } from "../utils/util";
+// import { getSelfUserId } from "../utils/util";
 import Settings from "@/components/settings.vue";
 import Nav from "@/components/navigate.vue";
 let { imAppId, rtcAppId, appKey } = config;
-let selfUserId = String(getSelfUserId());
+// let selfUserId = String(getSelfUserId());
+let selfUserId=1000;
 export default {
   name: "Home",
   data() {
@@ -155,18 +162,22 @@ export default {
       this.$store.commit("setResultSettingConfig", res);
     },
     async init() {
-      await this.getInfo();
-      await this.getToken();
+      try {
+        await this.getInfo();
+        await this.getToken();
+      } catch (error) {
+        console.log(error);
+      }
+
       // const { im, rtc } = this.info.data;
       this.lvcEngine = new window.LVCEngine({
         imAppId,
         rtcAppId,
         appKey,
         userId: this.selfUserId,
-        socketUrl: "wss://webimv2.fusionv.com/",
-        // socketUrl: "ws://10.61.153.49:10002",
+        // socketUrl: "wss://webimv2.fusionv.com/",
+        socketUrl: "ws://10.61.153.49:10002",
         token: this.token,
-        timeout:60 * 1000,
       });
       this.login();
     },
@@ -226,27 +237,32 @@ export default {
         this.$message.error("请选择要发送的用户");
       }
     },
-
     // 函数
     async call() {
-      this.isCall = true;
-      let content = { isAudio: false, extra: "" };
-      let type = "linkv_video_call";
-      try {
-        const self = this;
-        await this.sendEventMessage(content, type);
-        this.dialogVisible = true;
-        this.callTimer = setTimeout(() => {
-          this.$message.error("暂时无人接听请稍后重试");
-          self.hangUp();
-          this.$refs.audio.pause();
-        }, 30 * 1000);
-        setTimeout(() => {
-          self.$refs.audio.play();
-        });
-      } catch (error) {
-        console.log("发送呼叫消息失败", error);
-        this.$message.error("发送呼叫消息失败,请重新呼叫");
+      if (this.selfUserId == this.userId) {
+        this.$message.error("很抱歉不能呼叫自己");
+      } else {
+        if (this.userId) {
+          this.isCall = true;
+          let content = { isAudio: false, extra: "" };
+          let type = "linkv_video_call";
+          try {
+            const self = this;
+            await this.sendEventMessage(content, type);
+            this.dialogVisible = true;
+            this.callTimer = setTimeout(() => {
+              this.$message.error("暂时无人接听请稍后重试");
+              self.hangUp();
+              this.$refs.audio.pause();
+            }, 30 * 1000);
+            setTimeout(() => {
+              self.$refs.audio.play();
+            });
+          } catch (error) {
+            console.log("发送呼叫消息失败", error);
+            this.$message.error("发送呼叫消息失败,请重新呼叫");
+          }
+        }
       }
     },
     // 接收

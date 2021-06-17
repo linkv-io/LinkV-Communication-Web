@@ -12,7 +12,7 @@
         <input
           type="text"
           v-model="message"
-          @keydown.enter="onEnterSendMessage"
+          @keyup.enter="onEnterSendMessage"
         />
         <div @click="onSend">send</div>
       </div>
@@ -29,7 +29,6 @@ export default {
   props: ["rim", "roomId", "userId", "list"],
   watch: {
     list: function () {
-      console.log(this);
       this.$nextTick(() => {
         this.$refs.content.scrollTop = 10000;
       });
